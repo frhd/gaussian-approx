@@ -1,0 +1,6 @@
+*.o
+*.out
+*.dat
+*.csv
+.DS_Store
+vizga
