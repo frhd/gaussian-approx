@@ -2,9 +2,10 @@ CC = gcc
 CFLAGS = -Wall
 LDFLAGS = -lm
 
-OBJS = matrix.o eig.o gaussianApprox.o gaussianEstimator.o
+OBJS = matrix.o eig.o gaussianApprox.o gaussianEstimator.o main.o
 
-all: $(OBJS)
+vizga: $(OBJS)
+	$(CC) -o vizga $(OBJS) $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
