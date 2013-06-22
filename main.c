@@ -16,5 +16,10 @@ int main(int argc, char *argv[]) {
 	printMatrix(m);
 	freeMatrix(m);
 
+	printf("\nones 2x2:\n");
+	m = onesMatrix(2, 2);
+	printMatrix(m);
+	freeMatrix(m);
+
 	return 0;
 }
