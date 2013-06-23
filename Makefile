@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -O2
 LDFLAGS = -lm
 
 OBJS = matrix.o eig.o gaussianApprox.o gaussianEstimator.o main.o
