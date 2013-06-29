@@ -10,8 +10,8 @@ vizga: $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-run: vizga
-	./vizga
-
 clean:
 	rm -f *.o vizga
+
+run: vizga
+	./vizga
