@@ -2,7 +2,7 @@
 #include "matrix.h"
 
 int main(int argc, char *argv[]) {
-	Matrix m;
+	Matrix m, m2, r;
 
 	printf("=== matrix tests ===\n\n");
 
@@ -20,6 +20,14 @@ int main(int argc, char *argv[]) {
 	m = onesMatrix(2, 2);
 	printMatrix(m);
 	freeMatrix(m);
+
+	printf("\n--- addMatrix ---\n");
+	m = unitMatrix(2, 2);
+	m2 = onesMatrix(2, 2);
+	r = addMatrix(m, m2);
+	printf("I + ones =\n");
+	printMatrix(r);
+	freeMatrix(r);
 
 	return 0;
 }
