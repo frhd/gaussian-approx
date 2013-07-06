@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 	r = addMatrix(m, m2);
 	printf("I + ones =\n");
 	printMatrix(r);
+	freeMatrix(m);
+	freeMatrix(m2);
 	freeMatrix(r);
 
 	return 0;
