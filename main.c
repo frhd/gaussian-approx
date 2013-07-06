@@ -31,5 +31,16 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m2);
 	freeMatrix(r);
 
+	/* subMatrix */
+	printf("\n--- subMatrix ---\n");
+	m = onesMatrix(2, 2);
+	m2 = unitMatrix(2, 2);
+	r = subMatrix(m, m2);
+	printf("ones - I =\n");
+	printMatrix(r);
+	freeMatrix(m);
+	freeMatrix(m2);
+	freeMatrix(r);
+
 	return 0;
 }
