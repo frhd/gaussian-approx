@@ -59,5 +59,26 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m2);
 	freeMatrix(r);
 
+	/* transposeMatrix */
+	printf("\n--- transposeMatrix ---\n");
+	m = newMatrix(2, 3);
+	setElem(m, 0, 0, 1); setElem(m, 0, 1, 2); setElem(m, 0, 2, 3);
+	setElem(m, 1, 0, 4); setElem(m, 1, 1, 5); setElem(m, 1, 2, 6);
+	r = transposeMatrix(m);
+	printf("transpose of 2x3:\n");
+	printMatrix(r);
+	printf("result is %dx%d\n", r->height, r->width);
+	freeMatrix(m);
+	freeMatrix(r);
+
+	/* mulScalarMatrix */
+	printf("\n--- mulScalarMatrix ---\n");
+	m = unitMatrix(2, 2);
+	r = mulScalarMatrix(3.0, m);
+	printf("3 * I =\n");
+	printMatrix(r);
+	freeMatrix(m);
+	freeMatrix(r);
+
 	return 0;
 }
