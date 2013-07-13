@@ -42,5 +42,22 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m2);
 	freeMatrix(r);
 
+	/* mulMatrix */
+	printf("\n--- mulMatrix ---\n");
+	m = newMatrix(2, 3);
+	setElem(m, 0, 0, 1); setElem(m, 0, 1, 2); setElem(m, 0, 2, 3);
+	setElem(m, 1, 0, 4); setElem(m, 1, 1, 5); setElem(m, 1, 2, 6);
+	m2 = newMatrix(3, 2);
+	setElem(m2, 0, 0, 7); setElem(m2, 0, 1, 8);
+	setElem(m2, 1, 0, 9); setElem(m2, 1, 1, 10);
+	setElem(m2, 2, 0, 11); setElem(m2, 2, 1, 12);
+	r = mulMatrix(m, m2);
+	printf("A (2x3) * B (3x2) =\n");
+	printMatrix(r);
+	printf("expected: [[58,64],[139,154]]\n");
+	freeMatrix(m);
+	freeMatrix(m2);
+	freeMatrix(r);
+
 	return 0;
 }
