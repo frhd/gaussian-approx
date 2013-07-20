@@ -80,5 +80,22 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m);
 	freeMatrix(r);
 
+	/* sumMatrix */
+	printf("\n--- sumMatrix ---\n");
+	m = newMatrix(2, 3);
+	setElem(m, 0, 0, 1); setElem(m, 0, 1, 2); setElem(m, 0, 2, 3);
+	setElem(m, 1, 0, 4); setElem(m, 1, 1, 5); setElem(m, 1, 2, 6);
+	printf("matrix:\n");
+	printMatrix(m);
+	r = sumMatrix(m, 1);
+	printf("sum along dim 1 (col sums):\n");
+	printMatrix(r);
+	freeMatrix(r);
+	r = sumMatrix(m, 2);
+	printf("sum along dim 2 (row sums):\n");
+	printMatrix(r);
+	freeMatrix(m);
+	freeMatrix(r);
+
 	return 0;
 }
