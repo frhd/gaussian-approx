@@ -97,5 +97,15 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m);
 	freeMatrix(r);
 
+	/* appMatrix */
+	printf("\n--- appMatrix ---\n");
+	m = zeroMatrix(3, 3);
+	m2 = unitMatrix(2, 2);
+	appMatrix(m, 0, 1, 0, 1, m2, 0, 1, 0, 1);
+	printf("2x2 identity copied into top-left of 3x3 zero:\n");
+	printMatrix(m);
+	freeMatrix(m);
+	freeMatrix(m2);
+
 	return 0;
 }
