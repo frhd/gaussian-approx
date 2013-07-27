@@ -107,5 +107,16 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m);
 	freeMatrix(m2);
 
+	/* choleskyMatrix */
+	printf("\n--- choleskyMatrix ---\n");
+	m = newMatrix(2, 2);
+	setElem(m, 0, 0, 4); setElem(m, 0, 1, 2);
+	setElem(m, 1, 0, 2); setElem(m, 1, 1, 3);
+	r = choleskyMatrix(m);
+	printf("cholesky of [[4,2],[2,3]]:\n");
+	printMatrix(r);
+	freeMatrix(m);
+	freeMatrix(r);
+
 	return 0;
 }
