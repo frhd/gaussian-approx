@@ -127,8 +127,13 @@ int main(int argc, char *argv[]) {
 	printf("inv of [[4,2],[2,3]]:\n");
 	printMatrix(r);
 	printf("expected: [[0.375,-0.25],[-0.25,0.5]]\n");
+	/* verify A * inv(A) = I */
+	m2 = mulMatrix(m, r);
+	printf("A * inv(A):\n");
+	printMatrix(m2);
 	freeMatrix(m);
 	freeMatrix(r);
+	freeMatrix(m2);
 
 	return 0;
 }
