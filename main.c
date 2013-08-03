@@ -118,5 +118,17 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m);
 	freeMatrix(r);
 
+	/* invertCovMatrix */
+	printf("\n--- invertCovMatrix ---\n");
+	m = newMatrix(2, 2);
+	setElem(m, 0, 0, 4); setElem(m, 0, 1, 2);
+	setElem(m, 1, 0, 2); setElem(m, 1, 1, 3);
+	r = invertCovMatrix(m);
+	printf("inv of [[4,2],[2,3]]:\n");
+	printMatrix(r);
+	printf("expected: [[0.375,-0.25],[-0.25,0.5]]\n");
+	freeMatrix(m);
+	freeMatrix(r);
+
 	return 0;
 }
