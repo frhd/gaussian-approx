@@ -136,7 +136,31 @@ int main(int argc, char *argv[]) {
 	freeMatrix(r);
 	freeMatrix(m2);
 
-	/* TODO eig tests */
+	printf("\n=== eigendecomposition tests ===\n\n");
+
+	/* 2x2 symmetric */
+	printf("--- eig 2x2 ---\n");
+	{
+		Matrix A, Vec, Val;
+		A = newMatrix(2, 2);
+		setElem(A, 0, 0, 2); setElem(A, 0, 1, 1);
+		setElem(A, 1, 0, 1); setElem(A, 1, 1, 3);
+		printf("A =\n");
+		printMatrix(A);
+
+		Vec = newMatrix(2, 2);
+		Val = newMatrix(2, 2);
+		eig(&A, &Vec, &Val);
+
+		printf("eigenvalues:\n");
+		printMatrix(Val);
+		printf("eigenvectors:\n");
+		printMatrix(Vec);
+
+		freeMatrix(A);
+		freeMatrix(Vec);
+		freeMatrix(Val);
+	}
 
 	return 0;
 }
