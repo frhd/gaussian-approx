@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "matrix.h"
+#include "eig.h"
 
 int main(int argc, char *argv[]) {
 	Matrix m, m2, r;
@@ -134,6 +135,8 @@ int main(int argc, char *argv[]) {
 	freeMatrix(m);
 	freeMatrix(r);
 	freeMatrix(m2);
+
+	/* TODO eig tests */
 
 	return 0;
 }
