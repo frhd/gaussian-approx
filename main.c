@@ -157,6 +157,9 @@ int main(int argc, char *argv[]) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
+		/* expected eigenvalues: (5+sqrt(5))/2 ~ 3.618, (5-sqrt(5))/2 ~ 1.382 */
+		printf("expected eigenvalues: ~3.618, ~1.382\n");
+
 		freeMatrix(A);
 		freeMatrix(Vec);
 		freeMatrix(Val);
