@@ -165,5 +165,30 @@ int main(int argc, char *argv[]) {
 		freeMatrix(Val);
 	}
 
+	/* 3x3 symmetric */
+	printf("\n--- eig 3x3 ---\n");
+	{
+		Matrix A, Vec, Val;
+		A = newMatrix(3, 3);
+		setElem(A, 0, 0, 2); setElem(A, 0, 1, -1); setElem(A, 0, 2, 0);
+		setElem(A, 1, 0, -1); setElem(A, 1, 1, 2); setElem(A, 1, 2, -1);
+		setElem(A, 2, 0, 0); setElem(A, 2, 1, -1); setElem(A, 2, 2, 2);
+		printf("A =\n");
+		printMatrix(A);
+
+		Vec = newMatrix(3, 3);
+		Val = newMatrix(3, 3);
+		eig(&A, &Vec, &Val);
+
+		printf("eigenvalues:\n");
+		printMatrix(Val);
+		printf("eigenvectors:\n");
+		printMatrix(Vec);
+
+		freeMatrix(A);
+		freeMatrix(Vec);
+		freeMatrix(Val);
+	}
+
 	return 0;
 }
