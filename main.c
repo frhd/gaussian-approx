@@ -185,6 +185,17 @@ int main(int argc, char *argv[]) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
+		/* verify orthogonality: V^T * V should be ~I */
+		{
+			Matrix Vt, VtV;
+			Vt = transposeMatrix(Vec);
+			VtV = mulMatrix(Vt, Vec);
+			printf("V^T * V (should be ~I):\n");
+			printMatrix(VtV);
+			freeMatrix(Vt);
+			freeMatrix(VtV);
+		}
+
 		freeMatrix(A);
 		freeMatrix(Vec);
 		freeMatrix(Val);
