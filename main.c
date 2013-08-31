@@ -204,5 +204,12 @@ int main(int argc, char *argv[]) {
 
 	printf("\n=== gaussianApprox tests ===\n\n");
 
+	/* L=3 -> 2 points */
+	printf("--- gaussianApprox(3) ---\n");
+	r = gaussianApprox(3);
+	printf("L=3, %d sample points:\n", r->width);
+	printMatrix(r);
+	freeMatrix(r);
+
 	return 0;
 }
