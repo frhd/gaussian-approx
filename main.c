@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "matrix.h"
 #include "eig.h"
+#include "gaussianApprox.h"
 
 int main(int argc, char *argv[]) {
 	Matrix m, m2, r;
@@ -200,6 +201,8 @@ int main(int argc, char *argv[]) {
 		freeMatrix(Vec);
 		freeMatrix(Val);
 	}
+
+	printf("\n=== gaussianApprox tests ===\n\n");
 
 	return 0;
 }
