@@ -211,5 +211,19 @@ int main(int argc, char *argv[]) {
 	printMatrix(r);
 	freeMatrix(r);
 
+	/* L=5 -> 4 points */
+	printf("\n--- gaussianApprox(5) ---\n");
+	r = gaussianApprox(5);
+	printf("L=5, %d sample points:\n", r->width);
+	printMatrix(r);
+	freeMatrix(r);
+
+	/* L=7 -> 6 points */
+	printf("\n--- gaussianApprox(7) ---\n");
+	r = gaussianApprox(7);
+	printf("L=7, %d sample points:\n", r->width);
+	printMatrix(r);
+	freeMatrix(r);
+
 	return 0;
 }
