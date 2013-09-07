@@ -8,21 +8,25 @@ int main(int argc, char *argv[]) {
 
 	printf("=== matrix tests ===\n\n");
 
+	/* identity */
 	printf("identity 3x3:\n");
 	m = unitMatrix(3, 3);
 	printMatrix(m);
 	freeMatrix(m);
 
+	/* zero */
 	printf("\nzero 2x4:\n");
 	m = zeroMatrix(2, 4);
 	printMatrix(m);
 	freeMatrix(m);
 
+	/* ones */
 	printf("\nones 2x2:\n");
 	m = onesMatrix(2, 2);
 	printMatrix(m);
 	freeMatrix(m);
 
+	/* addMatrix */
 	printf("\n--- addMatrix ---\n");
 	m = unitMatrix(2, 2);
 	m2 = onesMatrix(2, 2);
@@ -56,6 +60,7 @@ int main(int argc, char *argv[]) {
 	r = mulMatrix(m, m2);
 	printf("A (2x3) * B (3x2) =\n");
 	printMatrix(r);
+	/* expect [[58,64],[139,154]] */
 	printf("expected: [[58,64],[139,154]]\n");
 	freeMatrix(m);
 	freeMatrix(m2);
