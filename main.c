@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
@@ -230,5 +231,6 @@ int main(int argc, char *argv[]) {
 	printMatrix(r);
 	freeMatrix(r);
 
+	printf("\nall tests done\n");
 	return 0;
 }
