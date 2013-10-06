@@ -4,5 +4,6 @@
 #include "matrix.h"
 
 void viz_bar(float value, float max_val, int width);
+void viz_vector(Matrix v);
 
 #endif
