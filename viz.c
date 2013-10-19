@@ -70,5 +70,13 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 		printf("\n");
 	}
 
+	for (x = 0; x < width; x++) printf("-");
+	printf("\n");
+
+	printf("%-*.*f", width / 2, 2, xmin);
+	printf("%*.2f", width - width / 2, xmax);
+	printf("\n");
+	printf("%*s%.2f\n", width / 2 - 2, "", mean);
+
 	free(pdf);
 }
