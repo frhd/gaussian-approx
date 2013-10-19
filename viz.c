@@ -43,13 +43,14 @@ void viz_vector(Matrix v) {
 }
 
 void viz_gaussian_1d(float mean, float sigma, int width, int height) {
-	int x;
-	float xmin, xmax, dx;
+	int x, y;
+	float xmin, xmax, dx, ymax;
 	float *pdf;
 
 	xmin = mean - 3 * sigma;
 	xmax = mean + 3 * sigma;
 	dx = (xmax - xmin) / (width - 1);
+	ymax = 1.0 / (sigma * sqrt(2 * pi));
 
 	pdf = (float *)malloc(width * sizeof(float));
 	for (x = 0; x < width; x++) {
@@ -58,9 +59,16 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 		pdf[x] = exp(-0.5 * z * z) / (sigma * sqrt(2 * pi));
 	}
 
-	for (x = 0; x < width; x++)
-		printf("%.4f ", pdf[x]);
-	printf("\n");
+	for (y = height - 1; y >= 0; y--) {
+		float ythresh = ymax * y / (height - 1);
+		for (x = 0; x < width; x++) {
+			if (pdf[x] >= ythresh)
+				printf("*");
+			else
+				printf(" ");
+		}
+		printf("\n");
+	}
 
 	free(pdf);
 }
