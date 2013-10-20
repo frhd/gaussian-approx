@@ -234,6 +234,19 @@ int main(int argc, char *argv[]) {
 
 	printf("\nall tests done\n");
 
+	printf("\n--- bar chart ---\n");
+	{
+		Matrix v = newMatrix(5, 1);
+		setElem(v, 0, 0, 3.0);
+		setElem(v, 1, 0, -1.5);
+		setElem(v, 2, 0, 4.2);
+		setElem(v, 3, 0, -2.8);
+		setElem(v, 4, 0, 1.0);
+		viz_vector(v);
+		freeMatrix(v);
+	}
+	printf("\n");
+
 	printf("\n--- gaussian N(0,1) ---\n");
 	viz_gaussian_1d(0.0, 1.0, 60, 15);
 
