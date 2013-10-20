@@ -3,6 +3,7 @@
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
+#include "viz.h"
 
 int main(int argc, char *argv[]) {
 	Matrix m, m2, r;
@@ -232,5 +233,9 @@ int main(int argc, char *argv[]) {
 	freeMatrix(r);
 
 	printf("\nall tests done\n");
+
+	printf("\n--- gaussian N(0,1) ---\n");
+	viz_gaussian_1d(0.0, 1.0, 60, 15);
+
 	return 0;
 }
