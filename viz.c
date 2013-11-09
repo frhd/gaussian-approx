@@ -80,3 +80,39 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 
 	free(pdf);
 }
+
+void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
+	int x, i, npts;
+	float xmin, xmax, dx;
+
+	xmin = mean - 3 * sigma;
+	xmax = mean + 3 * sigma;
+	dx = (xmax - xmin) / (width - 1);
+	npts = m_opt->width;
+
+	for (x = 0; x < width; x++) {
+		float xv = xmin + x * dx;
+		int marked = 0;
+
+		if (fabs(xv - mean) < dx * 0.5) {
+			printf("+");
+			marked = 1;
+		}
+
+		if (!marked) {
+			for (i = 0; i < npts; i++) {
+				float sp = mean + elem(m_opt, 0, i) * sigma;
+				if (fabs(xv - sp) < dx * 0.5) {
+					printf("|");
+					marked = 1;
+					break;
+				}
+			}
+		}
+
+		if (!marked) printf(" ");
+	}
+	printf("\n");
+
+	printf("(%d sigma points)\n", npts - 1);
+}
