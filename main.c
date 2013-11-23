@@ -5,8 +5,8 @@
 #include "gaussianApprox.h"
 #include "viz.h"
 
-int main(int argc, char *argv[]) {
-	Matrix m, m2, r, m_opt;
+static void run_tests(void) {
+	Matrix m, m2, r;
 
 	printf("=== matrix tests ===\n\n");
 
@@ -233,6 +233,12 @@ int main(int argc, char *argv[]) {
 	freeMatrix(r);
 
 	printf("\nall tests done\n");
+}
+
+int main(int argc, char *argv[]) {
+	Matrix m_opt;
+
+	run_tests();
 
 	printf("\n--- bar chart ---\n");
 	{
@@ -247,7 +253,7 @@ int main(int argc, char *argv[]) {
 	}
 	printf("\n");
 
-	printf("\n--- gaussian N(0,1) ---\n");
+	printf("--- gaussian N(0,1) ---\n");
 	viz_gaussian_1d(0.0, 1.0, 60, 15);
 
 	printf("\n--- sigma points (L=7) ---\n");
