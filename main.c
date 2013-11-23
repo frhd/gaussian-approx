@@ -238,11 +238,14 @@ static void run_tests(void) {
 
 int main(int argc, char *argv[]) {
 	Matrix m_opt;
+	float mean = 0.0, sigma = 1.0;
 
 	if (argc > 1 && strcmp(argv[1], "--test") == 0) {
 		run_tests();
 		return 0;
 	}
+
+	printf("Gaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
 
 	printf("--- bar chart ---\n");
 	{
@@ -258,11 +261,11 @@ int main(int argc, char *argv[]) {
 	printf("\n");
 
 	printf("--- gaussian N(0,1) ---\n");
-	viz_gaussian_1d(0.0, 1.0, 60, 15);
+	viz_gaussian_1d(mean, sigma, 60, 15);
 
 	printf("\n--- sigma points (L=7) ---\n");
 	m_opt = gaussianApprox(7);
-	viz_sigma_points_1d(0.0, 1.0, m_opt, 60);
+	viz_sigma_points_1d(mean, sigma, m_opt, 60);
 	freeMatrix(m_opt);
 
 	return 0;
