@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "matrix.h"
 #include "eig.h"
@@ -238,9 +239,12 @@ static void run_tests(void) {
 int main(int argc, char *argv[]) {
 	Matrix m_opt;
 
-	run_tests();
+	if (argc > 1 && strcmp(argv[1], "--test") == 0) {
+		run_tests();
+		return 0;
+	}
 
-	printf("\n--- bar chart ---\n");
+	printf("--- bar chart ---\n");
 	{
 		Matrix v = newMatrix(5, 1);
 		setElem(v, 0, 0, 3.0);
