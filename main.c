@@ -247,6 +247,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Gaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
 
+	/* bar chart demo */
 	printf("--- bar chart ---\n");
 	{
 		Matrix v = newMatrix(5, 1);
@@ -260,9 +261,11 @@ int main(int argc, char *argv[]) {
 	}
 	printf("\n");
 
+	/* gaussian curve */
 	printf("--- gaussian N(0,1) ---\n");
 	viz_gaussian_1d(mean, sigma, 60, 15);
 
+	/* sigma points */
 	printf("\n--- sigma points (L=7) ---\n");
 	m_opt = gaussianApprox(7);
 	viz_sigma_points_1d(mean, sigma, m_opt, 60);
