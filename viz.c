@@ -17,6 +17,7 @@ void viz_bar(float value, float max_val, int width) {
 	} else {
 		center = width / 2;
 		n = (int)(-value / max_val * (width / 2));
+		if (n > width / 2) n = width / 2;
 		for (i = 0; i < center - n; i++) printf(" ");
 		for (i = 0; i < n; i++) printf("#");
 		printf("\n");
