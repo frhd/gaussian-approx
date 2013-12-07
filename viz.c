@@ -27,12 +27,14 @@ void viz_vector(Matrix v) {
 	int i;
 	float max_val = 0;
 
+	/* find max absolute value */
 	for (i = 0; i < v->height; i++) {
 		float val = fabs(elem(v, i, 0));
 		if (val > max_val) max_val = val;
 	}
 	if (max_val == 0) max_val = 1.0;
 
+	/* scale markers */
 	printf("%-30s%30s\n", "", "");
 	printf("%-30.2f%30.2f\n", -max_val, max_val);
 
@@ -70,9 +72,11 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 		printf("\n");
 	}
 
+	/* x axis */
 	for (x = 0; x < width; x++) printf("-");
 	printf("\n");
 
+	/* labels */
 	printf("%-*.*f", width / 2, 2, xmin);
 	printf("%*.2f", width - width / 2, xmax);
 	printf("\n");
@@ -90,16 +94,19 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 	dx = (xmax - xmin) / (width - 1);
 	npts = m_opt->width;
 
+	/* marker line */
 	for (x = 0; x < width; x++) {
 		float xv = xmin + x * dx;
 		int marked = 0;
 
+		/* check mean */
 		if (fabs(xv - mean) < dx * 0.5) {
 			printf("+");
 			marked = 1;
 		}
 
 		if (!marked) {
+			/* check sigma points */
 			for (i = 0; i < npts; i++) {
 				float sp = mean + elem(m_opt, 0, i) * sigma;
 				if (fabs(xv - sp) < dx * 0.5) {
