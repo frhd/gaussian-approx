@@ -114,5 +114,5 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 	}
 	printf("\n");
 
-	printf("(%d sigma points)\n", npts - 1);
+	printf("(%d sigma points)\n", npts);
 }
