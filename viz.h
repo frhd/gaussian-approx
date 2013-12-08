@@ -3,7 +3,6 @@
 
 #include "matrix.h"
 
-/* visualization functions */
 void viz_bar(float value, float max_val, int width);
 void viz_vector(Matrix v);
 void viz_gaussian_1d(float mean, float sigma, int width, int height);
