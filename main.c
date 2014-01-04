@@ -1,10 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
+#include "noise.h"
+#include "tracker.h"
 #include "viz.h"
+
+/* Box-Muller transform */
+float randn(void) {
+	float u1, u2;
+	u1 = (float)rand() / RAND_MAX;
+	u2 = (float)rand() / RAND_MAX;
+	return sqrt(-2.0 * log(u1)) * cos(2.0 * pi * u2);
+}
 
 static void run_tests(void) {
 	Matrix m, m2, r;
@@ -237,6 +249,7 @@ static void run_tests(void) {
 }
 
 int main(int argc, char *argv[]) {
+	int i;
 	Matrix m_opt;
 	float mean = 0.0, sigma = 1.0;
 
@@ -245,7 +258,13 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	printf("Gaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
+	/* test randn */
+	srand(time(NULL));
+	printf("randn() test, 20 samples:\n");
+	for (i = 0; i < 20; i++)
+		printf("  %7.4f\n", randn());
+
+	printf("\nGaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
 
 	/* bar chart demo */
 	printf("--- bar chart ---\n");
