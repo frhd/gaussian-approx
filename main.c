@@ -13,7 +13,9 @@
 /* Box-Muller transform */
 float randn(void) {
 	float u1, u2;
-	u1 = (float)rand() / RAND_MAX;
+	do {
+		u1 = (float)rand() / RAND_MAX;
+	} while (u1 == 0);
 	u2 = (float)rand() / RAND_MAX;
 	return sqrt(-2.0 * log(u1)) * cos(2.0 * pi * u2);
 }
@@ -75,7 +77,6 @@ static void run_tests(void) {
 	r = mulMatrix(m, m2);
 	printf("A (2x3) * B (3x2) =\n");
 	printMatrix(r);
-	/* expect [[58,64],[139,154]] */
 	printf("expected: [[58,64],[139,154]]\n");
 	freeMatrix(m);
 	freeMatrix(m2);
@@ -149,7 +150,6 @@ static void run_tests(void) {
 	printf("inv of [[4,2],[2,3]]:\n");
 	printMatrix(r);
 	printf("expected: [[0.375,-0.25],[-0.25,0.5]]\n");
-	/* verify A * inv(A) = I */
 	m2 = mulMatrix(m, r);
 	printf("A * inv(A):\n");
 	printMatrix(m2);
@@ -159,7 +159,6 @@ static void run_tests(void) {
 
 	printf("\n=== eigendecomposition tests ===\n\n");
 
-	/* 2x2 symmetric */
 	printf("--- eig 2x2 ---\n");
 	{
 		Matrix A, Vec, Val;
@@ -178,7 +177,6 @@ static void run_tests(void) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
-		/* expected eigenvalues: (5+sqrt(5))/2 ~ 3.618, (5-sqrt(5))/2 ~ 1.382 */
 		printf("expected eigenvalues: ~3.618, ~1.382\n");
 
 		freeMatrix(A);
@@ -186,7 +184,6 @@ static void run_tests(void) {
 		freeMatrix(Val);
 	}
 
-	/* 3x3 symmetric */
 	printf("\n--- eig 3x3 ---\n");
 	{
 		Matrix A, Vec, Val;
@@ -206,7 +203,6 @@ static void run_tests(void) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
-		/* verify orthogonality: V^T * V should be ~I */
 		{
 			Matrix Vt, VtV;
 			Vt = transposeMatrix(Vec);
@@ -224,21 +220,18 @@ static void run_tests(void) {
 
 	printf("\n=== gaussianApprox tests ===\n\n");
 
-	/* L=3 -> 2 points */
 	printf("--- gaussianApprox(3) ---\n");
 	r = gaussianApprox(3);
 	printf("L=3, %d sample points:\n", r->width);
 	printMatrix(r);
 	freeMatrix(r);
 
-	/* L=5 -> 4 points */
 	printf("\n--- gaussianApprox(5) ---\n");
 	r = gaussianApprox(5);
 	printf("L=5, %d sample points:\n", r->width);
 	printMatrix(r);
 	freeMatrix(r);
 
-	/* L=7 -> 6 points */
 	printf("\n--- gaussianApprox(7) ---\n");
 	r = gaussianApprox(7);
 	printf("L=7, %d sample points:\n", r->width);
