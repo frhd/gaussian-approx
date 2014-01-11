@@ -8,6 +8,7 @@
 #include "gaussianApprox.h"
 #include "noise.h"
 #include "tracker.h"
+#include "gaussianEstimator.h"
 #include "viz.h"
 
 /* Box-Muller transform */
