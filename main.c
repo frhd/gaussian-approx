@@ -34,6 +34,16 @@ Matrix afun_1d(Matrix m, float dt) {
 	return out;
 }
 
+/* measurement function: observe position only */
+Matrix hfun_1d(Matrix m) {
+	int j;
+	Matrix out = newMatrix(1, m->width);
+	for (j = 0; j < m->width; j++) {
+		setElem(out, 0, j, elem(m, 0, j));
+	}
+	return out;
+}
+
 static void run_tests(void) {
 	Matrix m, m2, r;
 
