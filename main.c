@@ -21,6 +21,19 @@ float randn(void) {
 	return sqrt(-2.0 * log(u1)) * cos(2.0 * pi * u2);
 }
 
+/* constant velocity state transition */
+Matrix afun_1d(Matrix m, float dt) {
+	int j;
+	Matrix out = newMatrix(m->height, m->width);
+	for (j = 0; j < m->width; j++) {
+		float pos = elem(m, 0, j);
+		float vel = elem(m, 1, j);
+		setElem(out, 0, j, pos + vel * dt);
+		setElem(out, 1, j, vel);
+	}
+	return out;
+}
+
 static void run_tests(void) {
 	Matrix m, m2, r;
 
