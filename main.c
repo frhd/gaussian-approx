@@ -262,6 +262,27 @@ static void run_tests(void) {
 	printMatrix(r);
 	freeMatrix(r);
 
+
+	/* test afun_1d and hfun_1d */
+	printf("\n--- afun_1d / hfun_1d test ---\n");
+	{
+		Matrix st = newMatrix(2, 3);
+		Matrix r1, r2;
+		setElem(st, 0, 0, 1.0); setElem(st, 0, 1, 2.0); setElem(st, 0, 2, 3.0);
+		setElem(st, 1, 0, 0.5); setElem(st, 1, 1, 0.5); setElem(st, 1, 2, 0.5);
+		printf("input sigma points:\n");
+		printMatrix(st);
+		r1 = afun_1d(st, 0.1);
+		printf("after afun_1d(dt=0.1):\n");
+		printMatrix(r1);
+		r2 = hfun_1d(st);
+		printf("hfun_1d output:\n");
+		printMatrix(r2);
+		freeMatrix(st);
+		freeMatrix(r1);
+		freeMatrix(r2);
+	}
+
 	printf("\nall tests done\n");
 }
 
