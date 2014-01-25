@@ -329,9 +329,14 @@ static void run_demo(void) {
 
 	m_opt = gaussianApprox(L);
 
-	/* TODO: tracking loop */
 	printf("1D tracking demo (nsteps=%d, dt=%.2f, L=%d)\n", nsteps, dt, L);
-	printf("TODO: implement tracking loop\n");
+
+	/* single prediction test */
+	printf("before predict:\n");
+	printMatrix(xEst);
+	gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_1d, &dt, &m_opt);
+	printf("after predict:\n");
+	printMatrix(xEst);
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
