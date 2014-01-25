@@ -21,7 +21,7 @@ float randn(void) {
 	return sqrt(-2.0 * log(u1)) * cos(2.0 * pi * u2);
 }
 
-/* constant velocity state transition */
+/* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
 	Matrix out = newMatrix(m->height, m->width);
@@ -30,6 +30,10 @@ Matrix afun_1d(Matrix m, float dt) {
 		float vel = elem(m, 1, j);
 		setElem(out, 0, j, pos + vel * dt);
 		setElem(out, 1, j, vel);
+		setElem(out, 2, j, 0);
+		setElem(out, 3, j, 0);
+		setElem(out, 4, j, 0);
+		setElem(out, 5, j, 0);
 	}
 	return out;
 }
