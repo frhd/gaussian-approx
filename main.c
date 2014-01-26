@@ -338,6 +338,16 @@ static void run_demo(void) {
 	printf("after predict:\n");
 	printMatrix(xEst);
 
+	/* single update test */
+	{
+		Matrix y = newMatrix(1, 1);
+		setElem(y, 0, 0, 0.5);
+		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_1d, &m_opt);
+		printf("after update (meas=0.5):\n");
+		printMatrix(xEst);
+		freeMatrix(y);
+	}
+
 	freeMatrix(xEst);
 	freeMatrix(CEst);
 	freeMatrix(Cw);
