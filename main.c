@@ -292,20 +292,21 @@ static void run_tests(void) {
 
 
 static void run_demo(void) {
-	int nsteps = 50;
+	int i, nsteps = 50;
 	float dt = 0.1;
 	int L = 7;
+	float true_pos, true_vel;
+	float meas;
+	float err_sum = 0;
 
-	Matrix xEst, CEst, Cw, Cv, m_opt;
+	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 
 	srand(time(NULL));
 
-	/* initial state [pos, vel, 0, 0, 0, 0] */
 	xEst = zeroMatrix(6, 1);
 	setElem(xEst, 0, 0, 0.0);
 	setElem(xEst, 1, 0, 1.0);
 
-	/* initial covariance */
 	CEst = zeroMatrix(6, 6);
 	setElem(CEst, 0, 0, 10.0);
 	setElem(CEst, 1, 1, 5.0);
@@ -314,7 +315,6 @@ static void run_demo(void) {
 	setElem(CEst, 4, 4, 0.001);
 	setElem(CEst, 5, 5, 0.001);
 
-	/* process noise */
 	Cw = zeroMatrix(6, 6);
 	setElem(Cw, 0, 0, 0.01);
 	setElem(Cw, 1, 1, 0.1);
@@ -323,36 +323,49 @@ static void run_demo(void) {
 	setElem(Cw, 4, 4, 0.001);
 	setElem(Cw, 5, 5, 0.001);
 
-	/* measurement noise */
 	Cv = newMatrix(1, 1);
 	setElem(Cv, 0, 0, 4.0);
 
 	m_opt = gaussianApprox(L);
 
-	printf("1D tracking demo (nsteps=%d, dt=%.2f, L=%d)\n", nsteps, dt, L);
+	true_pos = 0.0;
+	true_vel = 1.0;
 
-	/* single prediction test */
-	printf("before predict:\n");
-	printMatrix(xEst);
-	gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_1d, &dt, &m_opt);
-	printf("after predict:\n");
-	printMatrix(xEst);
+	y = newMatrix(1, 1);
 
-	/* single update test */
-	{
-		Matrix y = newMatrix(1, 1);
-		setElem(y, 0, 0, 0.5);
+	printf("1D Kalman tracking demo\n");
+	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+
+	for (i = 0; i < nsteps; i++) {
+		float est_pos, err;
+
+		true_pos += true_vel * dt + 0.01 * randn();
+		true_vel += 0.1 * randn();
+
+		meas = true_pos + 2.0 * randn();
+		setElem(y, 0, 0, meas);
+
+		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_1d, &dt, &m_opt);
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_1d, &m_opt);
-		printf("after update (meas=0.5):\n");
-		printMatrix(xEst);
-		freeMatrix(y);
+
+		est_pos = elem(xEst, 0, 0);
+		err = fabs(est_pos - true_pos);
+		err_sum += err;
+
+		printf("step %2d: est=%7.3f  true=%7.3f  meas=%7.3f  err=%5.3f\n",
+			i + 1, est_pos, true_pos, meas, err);
 	}
+
+	printf("\nmean abs error: %.3f\n", err_sum / nsteps);
+	printf("final estimate: %.3f (true: %.3f)\n",
+		elem(xEst, 0, 0), true_pos);
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
 	freeMatrix(Cw);
 	freeMatrix(Cv);
 	freeMatrix(m_opt);
+	freeMatrix(y);
 }
 
 int main(int argc, char *argv[]) {
