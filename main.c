@@ -378,13 +378,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	/* test randn */
-	srand(time(NULL));
-	printf("randn() test, 20 samples:\n");
-	for (i = 0; i < 20; i++)
-		printf("  %7.4f\n", randn());
-
-	printf("\nGaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
+	printf("Gaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
 
 	/* bar chart demo */
 	printf("--- bar chart ---\n");
