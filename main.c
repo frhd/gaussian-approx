@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
 	Matrix m_opt;
 	float mean = 0.0, sigma = 1.0;
 
-	if (argc > 1 && strcmp(argv[1], "--test") == 0) {
+	if (argc > 1 && strcmp(argv[1], "test") == 0) {
 		run_tests();
 		return 0;
 	}
