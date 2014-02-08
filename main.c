@@ -369,40 +369,11 @@ static void run_demo(void) {
 }
 
 int main(int argc, char *argv[]) {
-	int i;
-	Matrix m_opt;
-	float mean = 0.0, sigma = 1.0;
-
 	if (argc > 1 && strcmp(argv[1], "test") == 0) {
 		run_tests();
 		return 0;
 	}
 
-	printf("Gaussian N(%.2f, %.2f)\n\n", mean, sigma * sigma);
-
-	/* bar chart demo */
-	printf("--- bar chart ---\n");
-	{
-		Matrix v = newMatrix(5, 1);
-		setElem(v, 0, 0, 3.0);
-		setElem(v, 1, 0, -1.5);
-		setElem(v, 2, 0, 4.2);
-		setElem(v, 3, 0, -2.8);
-		setElem(v, 4, 0, 1.0);
-		viz_vector(v);
-		freeMatrix(v);
-	}
-	printf("\n");
-
-	/* gaussian curve */
-	printf("--- gaussian N(0,1) ---\n");
-	viz_gaussian_1d(mean, sigma, 60, 15);
-
-	/* sigma points */
-	printf("\n--- sigma points (L=7) ---\n");
-	m_opt = gaussianApprox(7);
-	viz_sigma_points_1d(mean, sigma, m_opt, 60);
-	freeMatrix(m_opt);
-
+	run_demo();
 	return 0;
 }
