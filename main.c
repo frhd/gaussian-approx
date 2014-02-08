@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
@@ -333,6 +334,7 @@ static void run_demo(void) {
 
 	y = newMatrix(1, 1);
 
+	printf("\033[2J\033[H");
 	printf("1D Kalman tracking demo\n");
 	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
 
@@ -354,6 +356,8 @@ static void run_demo(void) {
 
 		printf("step %2d: est=%7.3f  true=%7.3f  meas=%7.3f  err=%5.3f\n",
 			i + 1, est_pos, true_pos, meas, err);
+
+		usleep(200000);
 	}
 
 	printf("\nmean abs error: %.3f\n", err_sum / nsteps);
