@@ -354,6 +354,7 @@ static void run_demo(void) {
 		err = fabs(est_pos - true_pos);
 		err_sum += err;
 
+		printf("\033[2J\033[H");
 		printf("step %2d: est=%7.3f  true=%7.3f  meas=%7.3f  err=%5.3f\n",
 			i + 1, est_pos, true_pos, meas, err);
 
