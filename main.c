@@ -361,8 +361,10 @@ static void run_demo(void) {
 
 		viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
-		printf("\n  est=%7.3f  true=%7.3f  meas=%7.3f  err=%5.3f\n",
-			est_pos, true_pos, meas, err);
+		printf("\n  * estimate : %7.3f\n", est_pos);
+		printf("  o measured : %7.3f\n", meas);
+		printf("  x truth    : %7.3f\n", true_pos);
+		printf("  error      : %7.3f\n", err);
 
 		usleep(200000);
 	}
