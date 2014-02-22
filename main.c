@@ -361,6 +361,10 @@ static void run_demo(void) {
 
 		viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
+		/* show scaled covariance */
+		printf("\nscaled covariance:\n");
+		printMatrix(mulScalarMatrix(100.0, CEst));
+
 		printf("\n  * estimate : %7.3f\n", est_pos);
 		printf("  o measured : %7.3f\n", meas);
 		printf("  x truth    : %7.3f\n", true_pos);
