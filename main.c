@@ -369,6 +369,7 @@ static void run_demo(void) {
 		printf("  o measured : %7.3f\n", meas);
 		printf("  x truth    : %7.3f\n", true_pos);
 		printf("  error      : %7.3f\n", err);
+		printf("  variance   : %7.3f\n", est_var);
 
 		usleep(200000);
 	}
