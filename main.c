@@ -338,6 +338,7 @@ static void run_demo(void) {
 	printf("1D Kalman tracking demo\n");
 	printf("tracking constant velocity target\n");
 	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+	usleep(1000000);
 
 	for (i = 0; i < nsteps; i++) {
 		float est_pos, est_var, err;
