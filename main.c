@@ -7,9 +7,9 @@
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
+#include "gaussianEstimator.h"
 #include "noise.h"
 #include "tracker.h"
-#include "gaussianEstimator.h"
 #include "viz.h"
 
 /* Box-Muller transform */
@@ -39,7 +39,7 @@ Matrix afun_1d(Matrix m, float dt) {
 	return out;
 }
 
-/* measurement function: observe position only */
+/* observe position only from 6d state */
 Matrix hfun_1d(Matrix m) {
 	int j;
 	Matrix out = newMatrix(1, m->width);
@@ -106,6 +106,7 @@ static void run_tests(void) {
 	r = mulMatrix(m, m2);
 	printf("A (2x3) * B (3x2) =\n");
 	printMatrix(r);
+	/* expect [[58,64],[139,154]] */
 	printf("expected: [[58,64],[139,154]]\n");
 	freeMatrix(m);
 	freeMatrix(m2);
@@ -179,6 +180,7 @@ static void run_tests(void) {
 	printf("inv of [[4,2],[2,3]]:\n");
 	printMatrix(r);
 	printf("expected: [[0.375,-0.25],[-0.25,0.5]]\n");
+	/* verify A * inv(A) = I */
 	m2 = mulMatrix(m, r);
 	printf("A * inv(A):\n");
 	printMatrix(m2);
@@ -188,6 +190,7 @@ static void run_tests(void) {
 
 	printf("\n=== eigendecomposition tests ===\n\n");
 
+	/* 2x2 symmetric */
 	printf("--- eig 2x2 ---\n");
 	{
 		Matrix A, Vec, Val;
@@ -206,6 +209,7 @@ static void run_tests(void) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
+		/* expected eigenvalues: (5+sqrt(5))/2 ~ 3.618, (5-sqrt(5))/2 ~ 1.382 */
 		printf("expected eigenvalues: ~3.618, ~1.382\n");
 
 		freeMatrix(A);
@@ -213,6 +217,7 @@ static void run_tests(void) {
 		freeMatrix(Val);
 	}
 
+	/* 3x3 symmetric */
 	printf("\n--- eig 3x3 ---\n");
 	{
 		Matrix A, Vec, Val;
@@ -232,6 +237,7 @@ static void run_tests(void) {
 		printf("eigenvectors:\n");
 		printMatrix(Vec);
 
+		/* verify orthogonality: V^T * V should be ~I */
 		{
 			Matrix Vt, VtV;
 			Vt = transposeMatrix(Vec);
@@ -249,48 +255,29 @@ static void run_tests(void) {
 
 	printf("\n=== gaussianApprox tests ===\n\n");
 
+	/* L=3 -> 2 points */
 	printf("--- gaussianApprox(3) ---\n");
 	r = gaussianApprox(3);
 	printf("L=3, %d sample points:\n", r->width);
 	printMatrix(r);
 	freeMatrix(r);
 
+	/* L=5 -> 4 points */
 	printf("\n--- gaussianApprox(5) ---\n");
 	r = gaussianApprox(5);
 	printf("L=5, %d sample points:\n", r->width);
 	printMatrix(r);
 	freeMatrix(r);
 
+	/* L=7 -> 6 points */
 	printf("\n--- gaussianApprox(7) ---\n");
 	r = gaussianApprox(7);
 	printf("L=7, %d sample points:\n", r->width);
 	printMatrix(r);
 	freeMatrix(r);
 
-
-	/* test afun_1d and hfun_1d */
-	printf("\n--- afun_1d / hfun_1d test ---\n");
-	{
-		Matrix st = newMatrix(2, 3);
-		Matrix r1, r2;
-		setElem(st, 0, 0, 1.0); setElem(st, 0, 1, 2.0); setElem(st, 0, 2, 3.0);
-		setElem(st, 1, 0, 0.5); setElem(st, 1, 1, 0.5); setElem(st, 1, 2, 0.5);
-		printf("input sigma points:\n");
-		printMatrix(st);
-		r1 = afun_1d(st, 0.1);
-		printf("after afun_1d(dt=0.1):\n");
-		printMatrix(r1);
-		r2 = hfun_1d(st);
-		printf("hfun_1d output:\n");
-		printMatrix(r2);
-		freeMatrix(st);
-		freeMatrix(r1);
-		freeMatrix(r2);
-	}
-
 	printf("\nall tests done\n");
 }
-
 
 static void run_demo(void) {
 	int i, nsteps = 50;
@@ -300,14 +287,17 @@ static void run_demo(void) {
 	float meas;
 	float err_sum = 0;
 
+	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 
 	srand(time(NULL));
 
+	/* initial state estimate [pos, vel, 0, 0, 0, 0] */
 	xEst = zeroMatrix(6, 1);
 	setElem(xEst, 0, 0, 0.0);
 	setElem(xEst, 1, 0, 1.0);
 
+	/* initial covariance 6x6 */
 	CEst = zeroMatrix(6, 6);
 	setElem(CEst, 0, 0, 10.0);
 	setElem(CEst, 1, 1, 5.0);
@@ -316,6 +306,7 @@ static void run_demo(void) {
 	setElem(CEst, 4, 4, 0.001);
 	setElem(CEst, 5, 5, 0.001);
 
+	/* process noise 6x6 */
 	Cw = zeroMatrix(6, 6);
 	setElem(Cw, 0, 0, 0.01);
 	setElem(Cw, 1, 1, 0.1);
@@ -324,14 +315,18 @@ static void run_demo(void) {
 	setElem(Cw, 4, 4, 0.001);
 	setElem(Cw, 5, 5, 0.001);
 
+	/* measurement noise */
 	Cv = newMatrix(1, 1);
 	setElem(Cv, 0, 0, 4.0);
 
+	/* sigma points */
 	m_opt = gaussianApprox(L);
 
+	/* true initial state */
 	true_pos = 0.0;
 	true_vel = 1.0;
 
+	/* measurement vector */
 	y = newMatrix(1, 1);
 
 	printf("\033[2J\033[H");
@@ -343,30 +338,36 @@ static void run_demo(void) {
 	for (i = 0; i < nsteps; i++) {
 		float est_pos, est_var, err;
 
+		/* propagate true state */
 		true_pos += true_vel * dt + 0.01 * randn();
 		true_vel += 0.1 * randn();
 
+		/* generate measurement */
 		meas = true_pos + 2.0 * randn();
 		setElem(y, 0, 0, meas);
 
+		/* predict */
 		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_1d, &dt, &m_opt);
+
+		/* update */
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_1d, &m_opt);
 
 		est_pos = elem(xEst, 0, 0);
+		est_var = elem(CEst, 0, 0);
 		err = fabs(est_pos - true_pos);
 		err_sum += err;
 
-		est_var = elem(CEst, 0, 0);
-
+		/* display */
 		printf("\033[2J\033[H");
-		printf("1D Kalman tracking  [step %d/%d]\n\n", i + 1, nsteps);
+		printf("1D Kalman tracking demo  [step %d/%d]\n\n", i + 1, nsteps);
 
 		viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
-		/* show scaled covariance */
+		/* Bug 3: mulScalarMatrix result not freed (memory leak) */
 		printf("\nscaled covariance:\n");
 		printMatrix(mulScalarMatrix(100.0, CEst));
 
+		/* markers */
 		printf("\n  * estimate : %7.3f\n", est_pos);
 		printf("  o measured : %7.3f\n", meas);
 		printf("  x truth    : %7.3f\n", true_pos);
@@ -376,9 +377,11 @@ static void run_demo(void) {
 		usleep(200000);
 	}
 
-	printf("\nmean abs error: %.3f\n", err_sum / nsteps);
-	printf("final estimate: %.3f (true: %.3f)\n",
+	printf("\n--- summary ---\n");
+	printf("mean abs error: %.3f\n", err_sum / nsteps);
+	printf("final pos estimate: %.3f (true: %.3f)\n",
 		elem(xEst, 0, 0), true_pos);
+	printf("final variance: %.3f\n", elem(CEst, 0, 0));
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
