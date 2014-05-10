@@ -127,8 +127,29 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 }
 
 void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
+	int r, c;
+
 	g->xmin = xmin;
 	g->xmax = xmax;
 	g->ymin = ymin;
 	g->ymax = ymax;
+
+	/* fill with spaces */
+	for (r = 0; r < GRID_H; r++)
+		for (c = 0; c < GRID_W; c++)
+			g->cells[r][c] = ' ';
+
+	/* draw border */
+	for (c = 0; c < GRID_W; c++) {
+		g->cells[0][c] = '-';
+		g->cells[GRID_H - 1][c] = '-';
+	}
+	for (r = 0; r < GRID_H; r++) {
+		g->cells[r][0] = '|';
+		g->cells[r][GRID_W - 1] = '|';
+	}
+	g->cells[0][0] = '+';
+	g->cells[0][GRID_W - 1] = '+';
+	g->cells[GRID_H - 1][0] = '+';
+	g->cells[GRID_H - 1][GRID_W - 1] = '+';
 }
