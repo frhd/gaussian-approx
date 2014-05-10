@@ -125,3 +125,10 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 
 	printf("(%d sigma points)\n", npts);
 }
+
+void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
+	g->xmin = xmin;
+	g->xmax = xmax;
+	g->ymin = ymin;
+	g->ymax = ymax;
+}

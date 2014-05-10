@@ -16,4 +16,6 @@ void viz_vector(Matrix v);
 void viz_gaussian_1d(float mean, float sigma, int width, int height);
 void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width);
 
+void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax);
+
 #endif
