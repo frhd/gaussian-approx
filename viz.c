@@ -153,3 +153,12 @@ void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
 	g->cells[GRID_H - 1][0] = '+';
 	g->cells[GRID_H - 1][GRID_W - 1] = '+';
 }
+
+void viz_grid_print(Grid *g) {
+	int r, c;
+	for (r = 0; r < GRID_H; r++) {
+		for (c = 0; c < GRID_W; c++)
+			putchar(g->cells[r][c]);
+		putchar('\n');
+	}
+}
