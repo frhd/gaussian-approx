@@ -397,6 +397,13 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	if (argc > 1 && strcmp(argv[1], "grid") == 0) {
+		Grid g;
+		viz_grid_init(&g, -1.0, 1.0, -1.0, 1.0);
+		viz_grid_print(&g);
+		return 0;
+	}
+
 	run_demo();
 	return 0;
 }
