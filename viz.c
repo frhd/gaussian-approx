@@ -162,3 +162,17 @@ void viz_grid_print(Grid *g) {
 		putchar('\n');
 	}
 }
+
+int viz_grid_map_x(Grid *g, float x) {
+	int cx = 1 + (int)((x - g->xmin) / (g->xmax - g->xmin) * (GRID_W - 4));
+	if (cx < 1) cx = 1;
+	if (cx > GRID_W - 2) cx = GRID_W - 2;
+	return cx;
+}
+
+int viz_grid_map_y(Grid *g, float y) {
+	int cy = (GRID_H - 2) - (int)((y - g->ymin) / (g->ymax - g->ymin) * (GRID_H - 3));
+	if (cy < 1) cy = 1;
+	if (cy > GRID_H - 2) cy = GRID_H - 2;
+	return cy;
+}
