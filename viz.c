@@ -176,3 +176,9 @@ int viz_grid_map_y(Grid *g, float y) {
 	if (cy > GRID_H - 2) cy = GRID_H - 2;
 	return cy;
 }
+
+void viz_grid_point(Grid *g, float x, float y, char ch) {
+	int cx = viz_grid_map_x(g, x);
+	int cy = viz_grid_map_y(g, y);
+	g->cells[cy][cx] = ch;
+}
