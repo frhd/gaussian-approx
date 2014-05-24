@@ -400,6 +400,7 @@ int main(int argc, char *argv[]) {
 	if (argc > 1 && strcmp(argv[1], "grid") == 0) {
 		Grid g;
 		viz_grid_init(&g, -1.0, 1.0, -1.0, 1.0);
+		viz_grid_point(&g, 0.0, 0.0, '+');
 		viz_grid_print(&g);
 		return 0;
 	}
