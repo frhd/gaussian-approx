@@ -398,9 +398,15 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (argc > 1 && strcmp(argv[1], "grid") == 0) {
+		int k;
 		Grid g;
 		viz_grid_init(&g, -1.0, 1.0, -1.0, 1.0);
 		viz_grid_point(&g, 0.0, 0.0, '+');
+		/* diagonal */
+		for (k = 0; k < 20; k++) {
+			float t = -1.0 + k * 0.1;
+			viz_grid_point(&g, t, t, '*');
+		}
 		viz_grid_print(&g);
 		return 0;
 	}
