@@ -21,5 +21,6 @@ void viz_grid_print(Grid *g);
 int  viz_grid_map_x(Grid *g, float x);
 int  viz_grid_map_y(Grid *g, float y);
 void viz_grid_point(Grid *g, float x, float y, char ch);
+void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch);
 
 #endif

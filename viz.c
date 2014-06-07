@@ -182,3 +182,13 @@ void viz_grid_point(Grid *g, float x, float y, char ch) {
 	int cy = viz_grid_map_y(g, y);
 	g->cells[cy][cx] = ch;
 }
+
+void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch) {
+	int i, n;
+	n = xs->width > ys->width ? ys->width : xs->width;
+	for (i = 0; i < n; i++) {
+		float x = elem(xs, 0, i);
+		float y = elem(ys, 0, i);
+		viz_grid_point(g, x, y, ch);
+	}
+}
