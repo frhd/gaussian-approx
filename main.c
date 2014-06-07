@@ -398,16 +398,24 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (argc > 1 && strcmp(argv[1], "grid") == 0) {
-		int k;
+		int k, npts = 50;
 		Grid g;
-		viz_grid_init(&g, -1.0, 1.0, -1.0, 1.0);
-		viz_grid_point(&g, 0.0, 0.0, '+');
-		/* diagonal */
-		for (k = 0; k < 20; k++) {
-			float t = -1.0 + k * 0.1;
-			viz_grid_point(&g, t, t, '*');
+		Matrix xs, ys;
+
+		xs = newMatrix(1, npts);
+		ys = newMatrix(1, npts);
+		for (k = 0; k < npts; k++) {
+			float t = -3.14159 + k * 2.0 * 3.14159 / (npts - 1);
+			setElem(xs, 0, k, t);
+			setElem(ys, 0, k, sin(t));
 		}
+
+		viz_grid_init(&g, -3.14159, 3.14159, -1.2, 1.2);
+		viz_grid_trajectory(&g, xs, ys, '*');
 		viz_grid_print(&g);
+
+		freeMatrix(xs);
+		freeMatrix(ys);
 		return 0;
 	}
 
