@@ -412,6 +412,13 @@ int main(int argc, char *argv[]) {
 
 		viz_grid_init(&g, -3.14159, 3.14159, -1.2, 1.2);
 		viz_grid_trajectory(&g, xs, ys, '*');
+
+		/* add a circle */
+		for (k = 0; k < 60; k++) {
+			float angle = k * 2.0 * 3.14159 / 60;
+			viz_grid_point(&g, cos(angle), sin(angle), 'o');
+		}
+
 		viz_grid_print(&g);
 
 		freeMatrix(xs);
