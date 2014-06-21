@@ -156,7 +156,18 @@ void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
 
 void viz_grid_print(Grid *g) {
 	int r, c;
+	char label[16];
+	float yval;
+
 	for (r = 0; r < GRID_H; r++) {
+		/* y axis label on left */
+		yval = g->ymax - (g->ymax - g->ymin) * r / (GRID_H - 1);
+		if (r == 0 || r == GRID_H / 2 || r == GRID_H - 1) {
+			snprintf(label, sizeof(label), "%6.2f ", yval);
+			printf("%s", label);
+		} else {
+			printf("       ");
+		}
 		for (c = 0; c < GRID_W; c++)
 			putchar(g->cells[r][c]);
 		putchar('\n');
