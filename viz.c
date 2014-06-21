@@ -158,6 +158,7 @@ void viz_grid_print(Grid *g) {
 	int r, c;
 	char label[16];
 	float yval;
+	float xmid;
 
 	for (r = 0; r < GRID_H; r++) {
 		/* y axis label on left */
@@ -172,6 +173,12 @@ void viz_grid_print(Grid *g) {
 			putchar(g->cells[r][c]);
 		putchar('\n');
 	}
+
+	/* x axis labels */
+	xmid = (g->xmin + g->xmax) / 2.0;
+	printf("       %-*.*f", GRID_W / 2, 2, g->xmin);
+	printf("%*.2f\n", GRID_W - GRID_W / 2, g->xmax);
+	printf("       %*s%.2f\n", GRID_W / 2 - 2, "", xmid);
 }
 
 int viz_grid_map_x(Grid *g, float x) {
