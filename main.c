@@ -419,6 +419,7 @@ int main(int argc, char *argv[]) {
 			viz_grid_point(&g, cos(angle), sin(angle), 'o');
 		}
 
+		printf("2d grid renderer test\n\n");
 		viz_grid_print(&g);
 
 		freeMatrix(xs);
