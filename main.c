@@ -413,6 +413,13 @@ static void run_grid_demo(void) {
 		viz_grid_point(&g, cos(angle), sin(angle), 'o');
 	}
 
+	/* some individual test points */
+	viz_grid_point(&g, 0.0, 0.0, '+');
+	viz_grid_point(&g, -3.0, 0.0, 'L');
+	viz_grid_point(&g, 3.0, 0.0, 'R');
+	viz_grid_point(&g, 0.0, 1.0, 'T');
+	viz_grid_point(&g, 0.0, -1.0, 'B');
+
 	printf("2d grid renderer test\n\n");
 	viz_grid_print(&g);
 
