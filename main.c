@@ -423,6 +423,7 @@ static void run_grid_demo(void) {
 	printf("2d grid renderer test\n\n");
 	viz_grid_print(&g);
 
+	/* free trajectory matrices */
 	freeMatrix(xs);
 	freeMatrix(ys);
 }
