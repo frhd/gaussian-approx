@@ -134,12 +134,10 @@ void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
 	g->ymin = ymin;
 	g->ymax = ymax;
 
-	/* fill with spaces */
 	for (r = 0; r < GRID_H; r++)
 		for (c = 0; c < GRID_W; c++)
 			g->cells[r][c] = ' ';
 
-	/* draw border */
 	for (c = 0; c < GRID_W; c++) {
 		g->cells[0][c] = '-';
 		g->cells[GRID_H - 1][c] = '-';
@@ -157,11 +155,9 @@ void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
 void viz_grid_print(Grid *g) {
 	int r, c;
 	char label[16];
-	float yval;
-	float xmid;
+	float yval, xmid;
 
 	for (r = 0; r < GRID_H; r++) {
-		/* y axis label on left */
 		yval = g->ymax - (g->ymax - g->ymin) * r / (GRID_H - 1);
 		if (r == 0 || r == GRID_H / 2 || r == GRID_H - 1) {
 			snprintf(label, sizeof(label), "%6.2f ", yval);
@@ -174,7 +170,6 @@ void viz_grid_print(Grid *g) {
 		putchar('\n');
 	}
 
-	/* x axis labels */
 	xmid = (g->xmin + g->xmax) / 2.0;
 	printf("       %-*.*f", GRID_W / 2, 2, g->xmin);
 	printf("%*.2f\n", GRID_W - GRID_W / 2, g->xmax);
