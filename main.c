@@ -422,6 +422,7 @@ static void run_grid_demo(void) {
 
 	printf("2d grid renderer test\n\n");
 	viz_grid_print(&g);
+	printf("\nlegend: * sine wave  o unit circle  + origin  L/R/T/B edges\n");
 
 	/* free trajectory matrices */
 	freeMatrix(xs);
