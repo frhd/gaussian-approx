@@ -28,3 +28,21 @@ Matrix sim_trajectory_line(int nsteps, float dt, float vx, float vy) {
 	}
 	return pos;
 }
+
+Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
+	int i;
+	float omega = 0.5;	/* angular velocity */
+	Matrix pos = newMatrix(nsteps, 2);
+
+	for (i = 0; i < nsteps; i++) {
+		float t = i * dt;
+		float x = radius * cos(omega * t);
+		float y = radius * sin(omega * t);
+		/* add small process noise */
+		x += 0.05 * randn();
+		y += 0.05 * randn();
+		setElem(pos, i, 0, x);
+		setElem(pos, i, 1, y);
+	}
+	return pos;
+}
