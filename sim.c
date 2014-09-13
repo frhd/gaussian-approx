@@ -46,3 +46,17 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 	}
 	return pos;
 }
+
+Matrix sim_measurements(Matrix true_pos, float noise_std) {
+	int i, nsteps;
+	Matrix meas;
+
+	nsteps = true_pos->height;
+	meas = newMatrix(nsteps, 2);
+
+	for (i = 0; i < nsteps; i++) {
+		setElem(meas, i, 0, elem(true_pos, i, 0) + noise_std * randn());
+		setElem(meas, i, 1, elem(true_pos, i, 1) + noise_std * randn());
+	}
+	return meas;
+}

@@ -7,4 +7,7 @@
 Matrix sim_trajectory_line(int nsteps, float dt, float vx, float vy);
 Matrix sim_trajectory_circle(int nsteps, float dt, float radius);
 
+/* generate noisy measurements from true positions */
+Matrix sim_measurements(Matrix true_pos, float noise_std);
+
 #endif
