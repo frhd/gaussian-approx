@@ -60,6 +60,17 @@ Matrix afun_2d(Matrix m, float dt) {
 	return out;
 }
 
+/* observe [x, y] from 6d state */
+Matrix hfun_2d(Matrix m) {
+	int j;
+	Matrix out = newMatrix(2, m->width);
+	for (j = 0; j < m->width; j++) {
+		setElem(out, 0, j, elem(m, 0, j));
+		setElem(out, 1, j, elem(m, 1, j));
+	}
+	return out;
+}
+
 static void run_tests(void) {
 	Matrix m, m2, r;
 
