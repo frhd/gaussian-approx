@@ -41,6 +41,25 @@ Matrix hfun_1d(Matrix m) {
 	return out;
 }
 
+/* 2d constant velocity: state = [x, y, vx, vy, 0, 0] */
+Matrix afun_2d(Matrix m, float dt) {
+	int j;
+	Matrix out = newMatrix(m->height, m->width);
+	for (j = 0; j < m->width; j++) {
+		float x = elem(m, 0, j);
+		float y = elem(m, 1, j);
+		float vx = elem(m, 2, j);
+		float vy = elem(m, 3, j);
+		setElem(out, 0, j, x + vx * dt);
+		setElem(out, 1, j, y + vy * dt);
+		setElem(out, 2, j, vx);
+		setElem(out, 3, j, vy);
+		setElem(out, 4, j, 0);
+		setElem(out, 5, j, 0);
+	}
+	return out;
+}
+
 static void run_tests(void) {
 	Matrix m, m2, r;
 
