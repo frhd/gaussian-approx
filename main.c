@@ -413,6 +413,65 @@ static void run_demo(void) {
 	freeMatrix(y);
 }
 
+static void run_demo_2d(void) {
+	int i, nsteps = 100;
+	float dt = 0.1;
+	int L = 7;
+
+	Matrix xEst, CEst, Cw, Cv, m_opt, y;
+	Matrix true_pos, meas;
+
+	srand(time(NULL));
+
+	/* generate trajectory and measurements */
+	true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
+	meas = sim_measurements(true_pos, 2.0);
+
+	/* initial state estimate [x, y, vx, vy, 0, 0] */
+	xEst = zeroMatrix(6, 1);
+	setElem(xEst, 0, 0, elem(true_pos, 0, 0));
+	setElem(xEst, 1, 0, elem(true_pos, 0, 1));
+	setElem(xEst, 2, 0, 0.0);
+	setElem(xEst, 3, 0, 0.5);
+
+	/* initial covariance */
+	CEst = zeroMatrix(6, 6);
+	setElem(CEst, 0, 0, 10.0);
+	setElem(CEst, 1, 1, 10.0);
+	setElem(CEst, 2, 2, 5.0);
+	setElem(CEst, 3, 3, 5.0);
+	setElem(CEst, 4, 4, 0.001);
+	setElem(CEst, 5, 5, 0.001);
+
+	/* process noise */
+	Cw = zeroMatrix(6, 6);
+	setElem(Cw, 0, 0, 0.01);
+	setElem(Cw, 1, 1, 0.01);
+	setElem(Cw, 2, 2, 0.1);
+	setElem(Cw, 3, 3, 0.1);
+	setElem(Cw, 4, 4, 0.001);
+	setElem(Cw, 5, 5, 0.001);
+
+	/* measurement noise */
+	Cv = zeroMatrix(2, 2);
+	setElem(Cv, 0, 0, 4.0);
+	setElem(Cv, 1, 1, 4.0);
+
+	m_opt = gaussianApprox(L);
+	y = newMatrix(2, 1);
+
+	printf("2D tracking setup: nsteps=%d dt=%.2f L=%d\n", nsteps, dt, L);
+
+	freeMatrix(xEst);
+	freeMatrix(CEst);
+	freeMatrix(Cw);
+	freeMatrix(Cv);
+	freeMatrix(m_opt);
+	freeMatrix(y);
+	freeMatrix(true_pos);
+	freeMatrix(meas);
+}
+
 static void run_grid_demo(void) {
 	int k, npts = 50;
 	Grid g;
