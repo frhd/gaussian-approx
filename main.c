@@ -12,8 +12,6 @@
 #include "tracker.h"
 #include "viz.h"
 #include "sim.h"
-
-
 /* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
@@ -305,9 +303,9 @@ static void run_demo(void) {
 	int i, nsteps = 50;
 	float dt = 0.1;
 	int L = 7;
+	float err_sum = 0;
 	float true_pos, true_vel;
 	float meas;
-	float err_sum = 0;
 
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
@@ -417,6 +415,7 @@ static void run_demo_2d(void) {
 	int i, nsteps = 100;
 	float dt = 0.1;
 	int L = 7;
+	float err_sum = 0;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -460,7 +459,31 @@ static void run_demo_2d(void) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(2, 1);
 
-	printf("2D tracking setup: nsteps=%d dt=%.2f L=%d\n", nsteps, dt, L);
+
+	for (i = 0; i < nsteps; i++) {
+		float est_x, est_y, true_x, true_y, err;
+
+		true_x = elem(true_pos, i, 0);
+		true_y = elem(true_pos, i, 1);
+
+		/* measurement */
+		setElem(y, 0, 0, elem(meas, i, 0));
+		setElem(y, 1, 0, elem(meas, i, 1));
+
+		/* predict */
+		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_2d, &dt, &m_opt);
+
+		/* update */
+		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_2d, &m_opt);
+
+		est_x = elem(xEst, 0, 0);
+		est_y = elem(xEst, 1, 0);
+		err = sqrt((est_x - true_x) * (est_x - true_x) +
+		           (est_y - true_y) * (est_y - true_y));
+		err_sum += err;
+
+		printf("step %d: err=%.3f\n", i+1, err);
+	}
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
