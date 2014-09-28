@@ -304,6 +304,7 @@ static void run_demo(void) {
 	float dt = 0.1;
 	int L = 7;
 	float err_sum = 0;
+	float xmin, xmax, ymin, ymax, margin;
 	float true_pos, true_vel;
 	float meas;
 
@@ -416,6 +417,7 @@ static void run_demo_2d(void) {
 	float dt = 0.1;
 	int L = 7;
 	float err_sum = 0;
+	float xmin, xmax, ymin, ymax, margin;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -425,6 +427,22 @@ static void run_demo_2d(void) {
 	/* generate trajectory and measurements */
 	true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 	meas = sim_measurements(true_pos, 2.0);
+
+	/* auto-scale grid bounds */
+	xmin = xmax = elem(true_pos, 0, 0);
+	ymin = ymax = elem(true_pos, 0, 1);
+	for (i = 1; i < nsteps; i++) {
+		float tx = elem(true_pos, i, 0);
+		float ty = elem(true_pos, i, 1);
+		if (tx < xmin) xmin = tx;
+		if (tx > xmax) xmax = tx;
+		if (ty < ymin) ymin = ty;
+		if (ty > ymax) ymax = ty;
+	}
+	margin = (xmax - xmin) * 0.2;
+	if (margin < 1.0) margin = 1.0;
+	xmin -= margin; xmax += margin;
+	ymin -= margin; ymax += margin;
 
 	/* initial state estimate [x, y, vx, vy, 0, 0] */
 	xEst = zeroMatrix(6, 1);
