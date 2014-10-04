@@ -478,6 +478,12 @@ static void run_demo_2d(void) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(2, 1);
 
+	printf("\033[2J\033[H");
+	printf("2D Kalman tracking demo\n");
+	printf("tracking circular trajectory\n");
+	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+	usleep(1000000);
+
 
 	for (i = 0; i < nsteps; i++) {
 		float est_x, est_y, true_x, true_y, err;
@@ -522,8 +528,16 @@ static void run_demo_2d(void) {
 		/* plot estimate */
 		viz_grid_point(&g, est_x, est_y, '+');
 
+		printf("\033[2J\033[H");
 		printf("2D Kalman tracking  [step %d/%d]\n\n", i + 1, nsteps);
 		viz_grid_print(&g);
+
+		printf("\n  . truth    (%7.2f, %7.2f)\n", true_x, true_y);
+		printf("  o measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
+		printf("  + estimate (%7.2f, %7.2f)\n", est_x, est_y);
+		printf("  error: %.3f   rmse: %.3f\n", err, err_sum / (i + 1));
+
+		usleep(100000);
 	}
 
 	freeMatrix(xEst);
