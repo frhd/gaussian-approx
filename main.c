@@ -421,6 +421,7 @@ static void run_demo_2d(void) {
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
+	Grid g;
 
 	srand(time(NULL));
 
@@ -500,7 +501,29 @@ static void run_demo_2d(void) {
 		           (est_y - true_y) * (est_y - true_y));
 		err_sum += err;
 
-		printf("step %d: err=%.3f\n", i+1, err);
+
+		/* draw grid */
+		viz_grid_init(&g, xmin, xmax, ymin, ymax);
+
+		/* plot true trajectory up to this step */
+		{
+			int k;
+			for (k = 0; k <= i; k++)
+				viz_grid_point(&g, elem(true_pos, k, 0), elem(true_pos, k, 1), '.');
+		}
+
+		/* plot measurements up to this step */
+		{
+			int k;
+			for (k = 0; k <= i; k++)
+				viz_grid_point(&g, elem(meas, k, 0), elem(meas, k, 1), 'o');
+		}
+
+		/* plot estimate */
+		viz_grid_point(&g, est_x, est_y, '+');
+
+		printf("2D Kalman tracking  [step %d/%d]\n\n", i + 1, nsteps);
+		viz_grid_print(&g);
 	}
 
 	freeMatrix(xEst);
