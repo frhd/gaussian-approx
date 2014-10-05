@@ -540,6 +540,13 @@ static void run_demo_2d(void) {
 		usleep(100000);
 	}
 
+
+	printf("\n--- summary ---\n");
+	printf("mean rmse: %.3f\n", err_sum / nsteps);
+	printf("final estimate: (%.3f, %.3f)\n", elem(xEst, 0, 0), elem(xEst, 1, 0));
+	printf("final truth:    (%.3f, %.3f)\n",
+		elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+
 	freeMatrix(xEst);
 	freeMatrix(CEst);
 	freeMatrix(Cw);
