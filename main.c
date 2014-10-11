@@ -606,6 +606,11 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	run_demo();
+	if (argc > 1 && strcmp(argv[1], "1d") == 0) {
+		run_demo();
+		return 0;
+	}
+
+	run_demo_2d();
 	return 0;
 }
