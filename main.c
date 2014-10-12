@@ -413,7 +413,7 @@ static void run_demo(void) {
 }
 
 static void run_demo_2d(void) {
-	int i, nsteps = 100;
+	int i, nsteps = 100;	/* was 50 */
 	float dt = 0.1;
 	int L = 7;
 	float err_sum = 0;
