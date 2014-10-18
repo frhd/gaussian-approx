@@ -427,7 +427,7 @@ static void run_demo_2d(void) {
 
 	/* generate trajectory and measurements */
 	true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
-	meas = sim_measurements(true_pos, 2.0);
+	meas = sim_measurements(true_pos, 2.0);	/* was 1.0 */
 
 	/* auto-scale grid bounds */
 	xmin = xmax = elem(true_pos, 0, 0);
