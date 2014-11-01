@@ -177,6 +177,7 @@ void viz_grid_print(Grid *g) {
 }
 
 int viz_grid_map_x(Grid *g, float x) {
+	/* TODO: rightmost column never used? */
 	int cx = 1 + (int)((x - g->xmin) / (g->xmax - g->xmin) * (GRID_W - 4));
 	if (cx < 1) cx = 1;
 	if (cx > GRID_W - 2) cx = GRID_W - 2;
