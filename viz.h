@@ -16,6 +16,8 @@
 #define COL_DIM     "\033[2m"
 #define COL_BOLD    "\033[1m"
 
+extern int viz_color_enabled;
+
 typedef struct {
 	char cells[GRID_H][GRID_W];
 	float xmin, xmax, ymin, ymax;
@@ -32,5 +34,7 @@ int  viz_grid_map_x(Grid *g, float x);
 int  viz_grid_map_y(Grid *g, float y);
 void viz_grid_point(Grid *g, float x, float y, char ch);
 void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch);
+
+void viz_color(const char *code);
 
 #endif

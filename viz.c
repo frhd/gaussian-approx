@@ -4,6 +4,13 @@
 #include "viz.h"
 #include "tracker.h"
 
+int viz_color_enabled = 1;
+
+void viz_color(const char *code) {
+	if (viz_color_enabled)
+		printf("%s", code);
+}
+
 void viz_bar(float value, float max_val, int width) {
 	int i, n, center;
 	if (max_val <= 0) max_val = 1.0;
