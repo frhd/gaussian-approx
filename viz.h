@@ -6,6 +6,16 @@
 #define GRID_W 60
 #define GRID_H 30
 
+/* ansi color codes */
+#define COL_RESET   "\033[0m"
+#define COL_RED     "\033[31m"
+#define COL_GREEN   "\033[32m"
+#define COL_YELLOW  "\033[33m"
+#define COL_BLUE    "\033[34m"
+#define COL_CYAN    "\033[36m"
+#define COL_DIM     "\033[2m"
+#define COL_BOLD    "\033[1m"
+
 typedef struct {
 	char cells[GRID_H][GRID_W];
 	float xmin, xmax, ymin, ymax;
