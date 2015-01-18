@@ -84,14 +84,18 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 	}
 
 	/* x axis */
+	viz_color(COL_DIM);
 	for (x = 0; x < width; x++) printf("-");
 	printf("\n");
 
 	/* labels */
 	printf("%-*.*f", width / 2, 2, xmin);
 	printf("%*.2f", width - width / 2, xmax);
+	viz_color(COL_RESET);
 	printf("\n");
+	viz_color(COL_CYAN);
 	printf("%*s%.2f\n", width / 2 - 2, "", mean);
+	viz_color(COL_RESET);
 
 	free(pdf);
 }
