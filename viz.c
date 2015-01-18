@@ -125,7 +125,9 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 			for (i = 0; i < npts; i++) {
 				float sp = mean + elem(m_opt, 0, i) * sigma;
 				if (fabs(xv - sp) < dx * 0.5) {
+					viz_color(COL_RED);
 					printf("|");
+					viz_color(COL_RESET);
 					marked = 1;
 					break;
 				}
