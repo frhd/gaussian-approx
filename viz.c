@@ -73,9 +73,11 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 	for (y = height - 1; y >= 0; y--) {
 		float ythresh = ymax * y / (height - 1);
 		for (x = 0; x < width; x++) {
-			if (pdf[x] >= ythresh)
+			if (pdf[x] >= ythresh) {
+				viz_color(COL_BLUE);
 				printf("*");
-			else
+				viz_color(COL_RESET);
+			} else
 				printf(" ");
 		}
 		printf("\n");
