@@ -116,7 +116,9 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 
 		/* check mean */
 		if (fabs(xv - mean) < dx * 0.5) {
+			viz_color(COL_CYAN);
 			printf("+");
+			viz_color(COL_RESET);
 			marked = 1;
 		}
 
