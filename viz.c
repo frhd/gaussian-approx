@@ -192,6 +192,18 @@ void viz_grid_print(Grid *g) {
 				viz_color(COL_YELLOW);
 				putchar(ch);
 				viz_color(COL_RESET);
+			} else if (ch == '+' && (r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1)) {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '+') {
+				viz_color(COL_CYAN);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '|' || ch == '-') {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
 			} else {
 				putchar(ch);
 			}
