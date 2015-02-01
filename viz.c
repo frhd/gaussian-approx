@@ -182,8 +182,16 @@ void viz_grid_print(Grid *g) {
 		} else {
 			printf("       ");
 		}
-		for (c = 0; c < GRID_W; c++)
-			putchar(g->cells[r][c]);
+		for (c = 0; c < GRID_W; c++) {
+			char ch = g->cells[r][c];
+			if (ch == '.') {
+				viz_color(COL_GREEN);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else {
+				putchar(ch);
+			}
+		}
 		putchar('\n');
 	}
 
