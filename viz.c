@@ -212,9 +212,11 @@ void viz_grid_print(Grid *g) {
 	}
 
 	xmid = (g->xmin + g->xmax) / 2.0;
+	viz_color(COL_DIM);
 	printf("       %-*.*f", GRID_W / 2, 2, g->xmin);
 	printf("%*.2f\n", GRID_W - GRID_W / 2, g->xmax);
 	printf("       %*s%.2f\n", GRID_W / 2 - 2, "", xmid);
+	viz_color(COL_RESET);
 }
 
 int viz_grid_map_x(Grid *g, float x) {
