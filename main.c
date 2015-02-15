@@ -528,7 +528,11 @@ static void run_demo_2d(void) {
 
 		/* display */
 		printf("\033[2J\033[H");
-		printf("2D Kalman tracking  [step %d/%d]\n\n", i + 1, nsteps);
+		printf("2D Kalman tracking  ");
+		viz_color(COL_BOLD);
+		printf("[step %d/%d]", i + 1, nsteps);
+		viz_color(COL_RESET);
+		printf("\n\n");
 		viz_grid_print(&g);
 
 		printf("\n  . truth    (%7.2f, %7.2f)\n", true_x, true_y);
