@@ -535,9 +535,21 @@ static void run_demo_2d(void) {
 		printf("\n\n");
 		viz_grid_print(&g);
 
-		printf("\n  . truth    (%7.2f, %7.2f)\n", true_x, true_y);
-		printf("  o measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
-		printf("  + estimate (%7.2f, %7.2f)\n", est_x, est_y);
+		printf("\n  ");
+		viz_color(COL_GREEN);
+		printf(".");
+		viz_color(COL_RESET);
+		printf(" truth    (%7.2f, %7.2f)\n", true_x, true_y);
+		printf("  ");
+		viz_color(COL_YELLOW);
+		printf("o");
+		viz_color(COL_RESET);
+		printf(" measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
+		printf("  ");
+		viz_color(COL_CYAN);
+		printf("+");
+		viz_color(COL_RESET);
+		printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
 		printf("  error: %.3f   rmse: %.3f\n", err, err_sum / (i + 1));
 
 		usleep(100000);
