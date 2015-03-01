@@ -550,7 +550,16 @@ static void run_demo_2d(void) {
 		printf("+");
 		viz_color(COL_RESET);
 		printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
-		printf("  error: %.3f   rmse: %.3f\n", err, err_sum / (i + 1));
+		{
+			float rmse = err_sum / (i + 1);
+			printf("  error: %.3f   rmse: ", err);
+			if (rmse < 2.0) viz_color(COL_GREEN);
+			else if (rmse < 5.0) viz_color(COL_YELLOW);
+			else viz_color(COL_RED);
+			printf("%.3f", rmse);
+			viz_color(COL_RESET);
+			printf("\n");
+		}
 
 		usleep(100000);
 	}
