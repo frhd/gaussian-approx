@@ -380,7 +380,11 @@ static void run_demo(void) {
 
 		/* display */
 		printf("\033[2J\033[H");
-		printf("1D Kalman tracking demo  [step %d/%d]\n\n", i + 1, nsteps);
+		printf("1D Kalman tracking demo  ");
+		viz_color(COL_BOLD);
+		printf("[step %d/%d]", i + 1, nsteps);
+		viz_color(COL_RESET);
+		printf("\n\n");
 
 		viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
