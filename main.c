@@ -393,9 +393,21 @@ static void run_demo(void) {
 		printMatrix(mulScalarMatrix(100.0, CEst));
 
 		/* markers */
-		printf("\n  * estimate : %7.3f\n", est_pos);
-		printf("  o measured : %7.3f\n", meas);
-		printf("  x truth    : %7.3f\n", true_pos);
+		printf("\n  ");
+		viz_color(COL_CYAN);
+		printf("*");
+		viz_color(COL_RESET);
+		printf(" estimate : %7.3f\n", est_pos);
+		printf("  ");
+		viz_color(COL_YELLOW);
+		printf("o");
+		viz_color(COL_RESET);
+		printf(" measured : %7.3f\n", meas);
+		printf("  ");
+		viz_color(COL_GREEN);
+		printf("x");
+		viz_color(COL_RESET);
+		printf(" truth    : %7.3f\n", true_pos);
 		printf("  error      : %7.3f\n", err);
 		printf("  variance   : %7.3f\n", est_var);
 
