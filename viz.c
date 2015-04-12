@@ -72,7 +72,6 @@ void viz_gaussian_1d(float mean, float sigma, int width, int height) {
 		pdf[x] = exp(-0.5 * z * z) / (sigma * sqrt(2 * pi));
 	}
 
-	/* render curve */
 	for (y = height - 1; y >= 0; y--) {
 		float ythresh = ymax * y / (height - 1);
 		for (x = 0; x < width; x++) {
