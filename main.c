@@ -684,7 +684,7 @@ int main(int argc, char *argv[]) {
 	cfg.quiet = 0;
 	cfg.color = 1;
 
-	while ((opt = getopt(argc, argv, "m:n:d:L:s:h")) != -1) {
+	while ((opt = getopt(argc, argv, "m:n:d:L:s:qh")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
