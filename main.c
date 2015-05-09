@@ -28,6 +28,18 @@ typedef struct {
 	int color;
 } Config;
 
+static void print_usage(const char *prog) {
+	printf("usage: %s [options]\n", prog);
+	printf("  -m <mode>   demo mode: 2d, 1d, test, grid  (default: 2d)\n");
+	printf("  -n <steps>  number of steps                 (default: 100)\n");
+	printf("  -d <dt>     time step                       (default: 0.1)\n");
+	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
+	printf("  -s <seed>   random seed                     (default: time-based)\n");
+	printf("  -q          quiet mode (no animation)\n");
+	printf("  --no-color  disable ANSI colors\n");
+	printf("  -h          show this help\n");
+}
+
 /* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
@@ -650,6 +662,24 @@ static void run_grid_demo(void) {
 }
 
 int main(int argc, char *argv[]) {
+	int opt;
+	Config cfg;
+
+	/* defaults */
+	cfg.mode = MODE_2D;
+	cfg.nsteps = 100;
+	cfg.dt = 0.1;
+	cfg.L = 7;
+	cfg.seed = -1;
+	cfg.quiet = 0;
+	cfg.color = 1;
+
+	/* -h check */
+	if (argc > 1 && strcmp(argv[1], "-h") == 0) {
+		print_usage(argv[0]);
+		return 0;
+	}
+
 	if (argc > 1 && strcmp(argv[1], "test") == 0) {
 		run_tests();
 		return 0;
