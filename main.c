@@ -35,7 +35,7 @@ static void print_usage(const char *prog) {
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
 	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
-	printf("  -q          quiet mode (no animation)\n");
+	printf("  -q          quiet mode (final result only)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  -h          show this help\n");
 }
