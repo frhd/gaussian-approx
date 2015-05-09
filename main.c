@@ -718,6 +718,9 @@ int main(int argc, char *argv[]) {
 		case 's':
 			cfg.seed = atoi(optarg);
 			break;
+		case 'q':
+			cfg.quiet = 1;
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			return 0;
