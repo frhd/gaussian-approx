@@ -13,6 +13,21 @@
 #include "viz.h"
 #include "sim.h"
 
+#define MODE_2D   0
+#define MODE_1D   1
+#define MODE_TEST 2
+#define MODE_GRID 3
+
+typedef struct {
+	int mode;
+	int nsteps;
+	float dt;
+	int L;
+	int seed;
+	int quiet;
+	int color;
+} Config;
+
 /* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
