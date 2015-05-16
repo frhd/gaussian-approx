@@ -682,7 +682,7 @@ int main(int argc, char *argv[]) {
 	cfg.quiet = 0;
 	cfg.color = 1;
 
-	while ((opt = getopt(argc, argv, "m:n:h")) != -1) {
+	while ((opt = getopt(argc, argv, "m:n:d:L:h")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -696,6 +696,20 @@ int main(int argc, char *argv[]) {
 			cfg.nsteps = atoi(optarg);
 			if (cfg.nsteps <= 0) {
 				fprintf(stderr, "steps must be > 0\n");
+				return 1;
+			}
+			break;
+		case 'd':
+			cfg.dt = atof(optarg);
+			if (cfg.dt <= 0) {
+				fprintf(stderr, "dt must be > 0\n");
+				return 1;
+			}
+			break;
+		case 'L':
+			cfg.L = atoi(optarg);
+			if (cfg.L != 3 && cfg.L != 5 && cfg.L != 7) {
+				fprintf(stderr, "L must be 3, 5, or 7\n");
 				return 1;
 			}
 			break;
