@@ -682,7 +682,7 @@ int main(int argc, char *argv[]) {
 	cfg.quiet = 0;
 	cfg.color = 1;
 
-	while ((opt = getopt(argc, argv, "m:n:d:L:h")) != -1) {
+	while ((opt = getopt(argc, argv, "m:n:d:L:s:h")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -713,6 +713,9 @@ int main(int argc, char *argv[]) {
 				return 1;
 			}
 			break;
+		case 's':
+			cfg.seed = atoi(optarg);
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			return 0;
@@ -721,6 +724,12 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	}
+
+	/* seed rng */
+	if (cfg.seed >= 0)
+		srand(cfg.seed);
+	else
+		srand(time(NULL));
 
 	switch (cfg.mode) {
 	case MODE_TEST:
