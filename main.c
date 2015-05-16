@@ -661,6 +661,14 @@ static void run_grid_demo(void) {
 	freeMatrix(ys);
 }
 
+static int parse_mode(const char *s) {
+	if (strcmp(s, "2d") == 0) return MODE_2D;
+	if (strcmp(s, "1d") == 0) return MODE_1D;
+	if (strcmp(s, "test") == 0) return MODE_TEST;
+	if (strcmp(s, "grid") == 0) return MODE_GRID;
+	return -1;
+}
+
 int main(int argc, char *argv[]) {
 	int opt;
 	Config cfg;
@@ -674,27 +682,47 @@ int main(int argc, char *argv[]) {
 	cfg.quiet = 0;
 	cfg.color = 1;
 
-	/* -h check */
-	if (argc > 1 && strcmp(argv[1], "-h") == 0) {
-		print_usage(argv[0]);
-		return 0;
+	while ((opt = getopt(argc, argv, "m:n:h")) != -1) {
+		switch (opt) {
+		case 'm':
+			cfg.mode = parse_mode(optarg);
+			if (cfg.mode < 0) {
+				fprintf(stderr, "unknown mode: %s\n", optarg);
+				print_usage(argv[0]);
+				return 1;
+			}
+			break;
+		case 'n':
+			cfg.nsteps = atoi(optarg);
+			if (cfg.nsteps <= 0) {
+				fprintf(stderr, "steps must be > 0\n");
+				return 1;
+			}
+			break;
+		case 'h':
+			print_usage(argv[0]);
+			return 0;
+		default:
+			print_usage(argv[0]);
+			return 1;
+		}
 	}
 
-	if (argc > 1 && strcmp(argv[1], "test") == 0) {
+	switch (cfg.mode) {
+	case MODE_TEST:
 		run_tests();
-		return 0;
-	}
-
-	if (argc > 1 && strcmp(argv[1], "grid") == 0) {
+		break;
+	case MODE_GRID:
 		run_grid_demo();
-		return 0;
-	}
-
-	if (argc > 1 && strcmp(argv[1], "1d") == 0) {
+		break;
+	case MODE_1D:
 		run_demo();
-		return 0;
+		break;
+	case MODE_2D:
+	default:
+		run_demo_2d();
+		break;
 	}
 
-	run_demo_2d();
 	return 0;
 }
