@@ -378,11 +378,13 @@ static void run_demo(Config *cfg) {
 	/* measurement vector */
 	y = newMatrix(1, 1);
 
-	printf("\033[2J\033[H");
-	printf("1D Kalman tracking demo\n");
-	printf("tracking constant velocity target\n");
-	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
-	usleep(1000000);
+	if (!cfg->quiet) {
+		printf("\033[2J\033[H");
+		printf("1D Kalman tracking demo\n");
+		printf("tracking constant velocity target\n");
+		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+		usleep(1000000);
+	}
 
 	for (i = 0; i < nsteps; i++) {
 		float est_pos, est_var, err;
