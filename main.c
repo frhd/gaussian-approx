@@ -408,40 +408,42 @@ static void run_demo(Config *cfg) {
 		err = fabs(est_pos - true_pos);
 		err_sum += err;
 
-		/* display */
-		printf("\033[2J\033[H");
-		printf("1D Kalman tracking demo  ");
-		viz_color(COL_BOLD);
-		printf("[step %d/%d]", i + 1, nsteps);
-		viz_color(COL_RESET);
-		printf("\n\n");
+		if (!cfg->quiet) {
+			/* display */
+			printf("\033[2J\033[H");
+			printf("1D Kalman tracking demo  ");
+			viz_color(COL_BOLD);
+			printf("[step %d/%d]", i + 1, nsteps);
+			viz_color(COL_RESET);
+			printf("\n\n");
 
-		viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
+			viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
-		/* Bug 3: mulScalarMatrix result not freed (memory leak) */
-		printf("\nscaled covariance:\n");
-		printMatrix(mulScalarMatrix(100.0, CEst));
+			/* Bug 3: mulScalarMatrix result not freed (memory leak) */
+			printf("\nscaled covariance:\n");
+			printMatrix(mulScalarMatrix(100.0, CEst));
 
-		/* markers */
-		printf("\n  ");
-		viz_color(COL_CYAN);
-		printf("*");
-		viz_color(COL_RESET);
-		printf(" estimate : %7.3f\n", est_pos);
-		printf("  ");
-		viz_color(COL_YELLOW);
-		printf("o");
-		viz_color(COL_RESET);
-		printf(" measured : %7.3f\n", meas);
-		printf("  ");
-		viz_color(COL_GREEN);
-		printf("x");
-		viz_color(COL_RESET);
-		printf(" truth    : %7.3f\n", true_pos);
-		printf("  error      : %7.3f\n", err);
-		printf("  variance   : %7.3f\n", est_var);
+			/* markers */
+			printf("\n  ");
+			viz_color(COL_CYAN);
+			printf("*");
+			viz_color(COL_RESET);
+			printf(" estimate : %7.3f\n", est_pos);
+			printf("  ");
+			viz_color(COL_YELLOW);
+			printf("o");
+			viz_color(COL_RESET);
+			printf(" measured : %7.3f\n", meas);
+			printf("  ");
+			viz_color(COL_GREEN);
+			printf("x");
+			viz_color(COL_RESET);
+			printf(" truth    : %7.3f\n", true_pos);
+			printf("  error      : %7.3f\n", err);
+			printf("  variance   : %7.3f\n", est_var);
 
-		usleep(200000);
+			usleep(200000);
+		}
 	}
 
 	printf("\n--- summary ---\n");
