@@ -456,10 +456,11 @@ static void run_demo(Config *cfg) {
 	freeMatrix(y);
 }
 
-static void run_demo_2d(void) {
-	int i, nsteps = 100;
-	float dt = 0.1;
-	int L = 7;
+static void run_demo_2d(Config *cfg) {
+	int i;
+	int nsteps = cfg->nsteps;
+	float dt = cfg->dt;
+	int L = cfg->L;
 	float err_sum = 0;
 	float xmin, xmax, ymin, ymax, margin;
 
@@ -744,7 +745,7 @@ int main(int argc, char *argv[]) {
 		break;
 	case MODE_2D:
 	default:
-		run_demo_2d();
+		run_demo_2d(&cfg);
 		break;
 	}
 
