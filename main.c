@@ -327,10 +327,11 @@ static void run_tests(void) {
 	printf("\nall tests done\n");
 }
 
-static void run_demo(void) {
-	int i, nsteps = 50;
-	float dt = 0.1;
-	int L = 7;
+static void run_demo(Config *cfg) {
+	int i;
+	float dt = cfg->dt;
+	int L = cfg->L;
+	int nsteps = cfg->nsteps;
 	float true_pos, true_vel;
 	float meas;
 	float err_sum = 0;
@@ -739,7 +740,7 @@ int main(int argc, char *argv[]) {
 		run_grid_demo();
 		break;
 	case MODE_1D:
-		run_demo();
+		run_demo(&cfg);
 		break;
 	case MODE_2D:
 	default:
