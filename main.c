@@ -557,62 +557,64 @@ static void run_demo_2d(Config *cfg) {
 		           (est_y - true_y) * (est_y - true_y));
 		err_sum += err;
 
-		/* draw grid */
-		viz_grid_init(&g, xmin, xmax, ymin, ymax);
+		if (!cfg->quiet) {
+			/* draw grid */
+			viz_grid_init(&g, xmin, xmax, ymin, ymax);
 
-		/* plot true trajectory up to this step */
-		{
-			int k;
-			for (k = 0; k <= i; k++)
-				viz_grid_point(&g, elem(true_pos, k, 0), elem(true_pos, k, 1), '.');
-		}
+			/* plot true trajectory up to this step */
+			{
+				int k;
+				for (k = 0; k <= i; k++)
+					viz_grid_point(&g, elem(true_pos, k, 0), elem(true_pos, k, 1), '.');
+			}
 
-		/* plot measurements up to this step */
-		{
-			int k;
-			for (k = 0; k <= i; k++)
-				viz_grid_point(&g, elem(meas, k, 0), elem(meas, k, 1), 'o');
-		}
+			/* plot measurements up to this step */
+			{
+				int k;
+				for (k = 0; k <= i; k++)
+					viz_grid_point(&g, elem(meas, k, 0), elem(meas, k, 1), 'o');
+			}
 
-		/* plot estimate */
-		viz_grid_point(&g, est_x, est_y, '+');
+			/* plot estimate */
+			viz_grid_point(&g, est_x, est_y, '+');
 
-		/* display */
-		printf("\033[2J\033[H");
-		printf("2D Kalman tracking  ");
-		viz_color(COL_BOLD);
-		printf("[step %d/%d]", i + 1, nsteps);
-		viz_color(COL_RESET);
-		printf("\n\n");
-		viz_grid_print(&g);
-
-		printf("\n  ");
-		viz_color(COL_GREEN);
-		printf(".");
-		viz_color(COL_RESET);
-		printf(" truth    (%7.2f, %7.2f)\n", true_x, true_y);
-		printf("  ");
-		viz_color(COL_YELLOW);
-		printf("o");
-		viz_color(COL_RESET);
-		printf(" measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
-		printf("  ");
-		viz_color(COL_CYAN);
-		printf("+");
-		viz_color(COL_RESET);
-		printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
-		{
-			float rmse = err_sum / (i + 1);
-			printf("  error: %.3f   rmse: ", err);
-			if (rmse < 2.0) viz_color(COL_GREEN);
-			else if (rmse < 5.0) viz_color(COL_YELLOW);
-			else viz_color(COL_RED);
-			printf("%.3f", rmse);
+			/* display */
+			printf("\033[2J\033[H");
+			printf("2D Kalman tracking  ");
+			viz_color(COL_BOLD);
+			printf("[step %d/%d]", i + 1, nsteps);
 			viz_color(COL_RESET);
-			printf("\n");
-		}
+			printf("\n\n");
+			viz_grid_print(&g);
 
-		usleep(100000);
+			printf("\n  ");
+			viz_color(COL_GREEN);
+			printf(".");
+			viz_color(COL_RESET);
+			printf(" truth    (%7.2f, %7.2f)\n", true_x, true_y);
+			printf("  ");
+			viz_color(COL_YELLOW);
+			printf("o");
+			viz_color(COL_RESET);
+			printf(" measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
+			printf("  ");
+			viz_color(COL_CYAN);
+			printf("+");
+			viz_color(COL_RESET);
+			printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
+			{
+				float rmse = err_sum / (i + 1);
+				printf("  error: %.3f   rmse: ", err);
+				if (rmse < 2.0) viz_color(COL_GREEN);
+				else if (rmse < 5.0) viz_color(COL_YELLOW);
+				else viz_color(COL_RED);
+				printf("%.3f", rmse);
+				viz_color(COL_RESET);
+				printf("\n");
+			}
+
+			usleep(100000);
+		}
 	}
 
 	printf("\n--- summary ---\n");
