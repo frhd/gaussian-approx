@@ -527,11 +527,13 @@ static void run_demo_2d(Config *cfg) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(2, 1);
 
-	printf("\033[2J\033[H");
-	printf("2D Kalman tracking demo\n");
-	printf("tracking circular trajectory\n");
-	printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
-	usleep(1000000);
+	if (!cfg->quiet) {
+		printf("\033[2J\033[H");
+		printf("2D Kalman tracking demo\n");
+		printf("tracking circular trajectory\n");
+		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+		usleep(1000000);
+	}
 
 	for (i = 0; i < nsteps; i++) {
 		float est_x, est_y, true_x, true_y, err;
