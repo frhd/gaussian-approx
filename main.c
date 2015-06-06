@@ -470,8 +470,6 @@ static void run_demo_2d(Config *cfg) {
 	Matrix true_pos, meas;
 	Grid g;
 
-	srand(time(NULL));
-
 	/* generate trajectory and measurements */
 	true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 	meas = sim_measurements(true_pos, 2.0);
