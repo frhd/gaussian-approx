@@ -339,8 +339,6 @@ static void run_demo(Config *cfg) {
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 
-	srand(time(NULL));
-
 	/* initial state estimate [pos, vel, 0, 0, 0, 0] */
 	xEst = zeroMatrix(6, 1);
 	setElem(xEst, 0, 0, 0.0);
