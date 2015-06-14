@@ -750,6 +750,10 @@ int main(int argc, char *argv[]) {
 	else
 		srand(time(NULL));
 
+	/* disable colors if not a tty or --no-color given */
+	if (!cfg.color || !isatty(STDOUT_FILENO))
+		viz_color_enabled = 0;
+
 	switch (cfg.mode) {
 	case MODE_TEST:
 		run_tests();
