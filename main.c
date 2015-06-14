@@ -676,7 +676,7 @@ static int parse_mode(const char *s) {
 }
 
 int main(int argc, char *argv[]) {
-	int opt;
+	int opt, i;
 	Config cfg;
 
 	/* defaults */
@@ -687,6 +687,16 @@ int main(int argc, char *argv[]) {
 	cfg.seed = -1;
 	cfg.quiet = 0;
 	cfg.color = 1;
+
+	/* check for --no-color before getopt */
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "--no-color") == 0) {
+			cfg.color = 0;
+			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
+			argc--;
+			i--;
+		}
+	}
 
 	while ((opt = getopt(argc, argv, "m:n:d:L:s:qh")) != -1) {
 		switch (opt) {
