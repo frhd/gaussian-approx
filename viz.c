@@ -6,8 +6,6 @@
 
 int viz_color_enabled = 1;
 
-/* TODO: should check isatty(STDOUT_FILENO) and disable colors
-   when output is redirected to a file or pipe */
 void viz_color(const char *code) {
 	if (viz_color_enabled)
 		printf("%s", code);
