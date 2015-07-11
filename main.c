@@ -750,6 +750,13 @@ int main(int argc, char *argv[]) {
 	else
 		srand(time(NULL));
 
+	/* print config summary */
+	if (!cfg.quiet) {
+		const char *mnames[] = {"2d", "1d", "test", "grid"};
+		printf("vizga: mode=%s steps=%d dt=%.2f L=%d\n",
+			mnames[cfg.mode], cfg.nsteps, cfg.dt, cfg.L);
+	}
+
 	/* disable colors if not a tty or --no-color given */
 	if (!cfg.color || !isatty(STDOUT_FILENO))
 		viz_color_enabled = 0;
