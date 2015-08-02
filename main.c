@@ -692,7 +692,7 @@ int main(int argc, char *argv[]) {
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--no-color") == 0) {
 			cfg.color = 0;
-			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
+			memmove(&argv[i], &argv[i+1], (argc - i - 1) * sizeof(char *));
 			argc--;
 			i--;
 		}
