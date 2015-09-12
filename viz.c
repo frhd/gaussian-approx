@@ -249,3 +249,6 @@ void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch) {
 		viz_grid_point(g, x, y, ch);
 	}
 }
+
+void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
+}
