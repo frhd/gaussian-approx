@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "viz.h"
+#include "eig.h"
 #include "tracker.h"
 
 int viz_color_enabled = 1;
