@@ -251,4 +251,28 @@ void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch) {
 }
 
 void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
+	float a, b, theta;
+	Matrix A, Vec, Val;
+
+	/* extract 2x2 covariance and decompose */
+	A = newMatrix(2, 2);
+	setElem(A, 0, 0, elem(cov, 0, 0));
+	setElem(A, 0, 1, elem(cov, 0, 1));
+	setElem(A, 1, 0, elem(cov, 1, 0));
+	setElem(A, 1, 1, elem(cov, 1, 1));
+
+	Vec = newMatrix(2, 2);
+	Val = newMatrix(2, 2);
+	eig(&A, &Vec, &Val);
+
+	/* semi-axis lengths: k * sqrt(eigenvalue), k=2.0 for ~95% */
+	a = 2.0 * sqrt(elem(Val, 0, 0));
+	b = 2.0 * sqrt(elem(Val, 1, 1));
+
+	/* rotation angle from eigenvectors */
+	theta = atan2(elem(Vec, 1, 0), elem(Vec, 0, 0));
+
+	freeMatrix(A);
+	freeMatrix(Vec);
+	freeMatrix(Val);
 }
