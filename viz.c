@@ -251,7 +251,8 @@ void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch) {
 }
 
 void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
-	float a, b, theta;
+	int i, npts = 24;
+	float a, b, theta, t;
 	Matrix A, Vec, Val;
 
 	/* extract 2x2 covariance and decompose */
@@ -271,6 +272,22 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 
 	/* rotation angle from eigenvectors */
 	theta = atan2(elem(Vec, 1, 0), elem(Vec, 0, 0));
+
+	/* Bug 5: no terminal aspect ratio compensation
+	 * chars are ~2x taller than wide, should multiply x by 2
+	 * but we don't — ellipse will look squashed horizontally */
+
+	/* plot parametric ellipse */
+	for (i = 0; i < npts; i++) {
+		float ex, ey;
+		t = 2.0 * pi * i / npts;
+		ex = cx + a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
+		ey = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
+
+		int gx = viz_grid_map_x(g, ex);
+		int gy = viz_grid_map_y(g, ey);
+		g->cells[gy][gx] = ch;
+	}
 
 	freeMatrix(A);
 	freeMatrix(Vec);
