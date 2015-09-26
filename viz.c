@@ -284,9 +284,14 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 		ex = cx + a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
 		ey = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
 
-		int gx = viz_grid_map_x(g, ex);
-		int gy = viz_grid_map_y(g, ey);
-		g->cells[gy][gx] = ch;
+		/* only plot if inside grid bounds (with some margin) */
+		if (ex >= g->xmin && ex <= g->xmax && ey >= g->ymin && ey <= g->ymax) {
+			int gx = viz_grid_map_x(g, ex);
+			int gy = viz_grid_map_y(g, ey);
+			/* don't overwrite existing markers */
+			if (g->cells[gy][gx] == ' ')
+				g->cells[gy][gx] = ch;
+		}
 	}
 
 	freeMatrix(A);
