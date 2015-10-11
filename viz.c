@@ -201,6 +201,10 @@ void viz_grid_print(Grid *g) {
 				viz_color(COL_CYAN);
 				putchar(ch);
 				viz_color(COL_RESET);
+			} else if (ch == '~') {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
 			} else if (ch == '|' || ch == '-') {
 				viz_color(COL_DIM);
 				putchar(ch);
