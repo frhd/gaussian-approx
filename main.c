@@ -557,6 +557,9 @@ static void run_demo_2d(Config *cfg) {
 			/* draw grid */
 			viz_grid_init(&g, xmin, xmax, ymin, ymax);
 
+			/* draw covariance ellipse first (so markers draw on top) */
+			viz_grid_ellipse(&g, est_x, est_y, CEst, '~');
+
 			/* plot true trajectory up to this step */
 			{
 				int k;
