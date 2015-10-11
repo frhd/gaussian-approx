@@ -601,6 +601,11 @@ static void run_demo_2d(Config *cfg) {
 			printf("+");
 			viz_color(COL_RESET);
 			printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
+			printf("  ");
+			viz_color(COL_DIM);
+			printf("~");
+			viz_color(COL_RESET);
+			printf(" covariance ellipse\n");
 			{
 				float rmse = err_sum / (i + 1);
 				printf("  error: %.3f   rmse: ", err);
