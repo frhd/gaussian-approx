@@ -259,7 +259,7 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	float a, b, theta, t;
 	Matrix A, Vec, Val;
 
-	/* extract 2x2 covariance and decompose */
+	/* extract 2x2 position covariance and decompose */
 	A = newMatrix(2, 2);
 	setElem(A, 0, 0, elem(cov, 0, 0));
 	setElem(A, 0, 1, elem(cov, 0, 1));
