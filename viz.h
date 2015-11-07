@@ -37,5 +37,6 @@ void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch);
 void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch);
 
 void viz_color(const char *code);
+void viz_convergence_bar(float trace_p, float trace_p0, int width);
 
 #endif

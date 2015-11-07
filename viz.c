@@ -302,3 +302,20 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	freeMatrix(Vec);
 	freeMatrix(Val);
 }
+
+void viz_convergence_bar(float trace_p, float trace_p0, int width) {
+	int i, filled;
+	float ratio;
+
+	if (trace_p0 <= 0) trace_p0 = 1.0;
+	ratio = 1.0 - trace_p / trace_p0;
+
+	filled = (int)(ratio * width);
+
+	printf("[");
+	viz_color(COL_GREEN);
+	for (i = 0; i < filled; i++) printf("=");
+	viz_color(COL_RESET);
+	for (i = filled; i < width; i++) printf(" ");
+	printf("]");
+}
