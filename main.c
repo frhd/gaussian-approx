@@ -465,6 +465,7 @@ static void run_demo_2d(Config *cfg) {
 	int L = cfg->L;
 	float err_sum = 0;
 	float xmin, xmax, ymin, ymax, margin;
+	float trace_p0;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -523,6 +524,9 @@ static void run_demo_2d(Config *cfg) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(2, 1);
 
+	/* initial trace for convergence indicator */
+	trace_p0 = elem(CEst, 0, 0) + elem(CEst, 1, 1);
+
 	if (!cfg->quiet) {
 		printf("\033[2J\033[H");
 		printf("2D Kalman tracking demo\n");
@@ -533,6 +537,7 @@ static void run_demo_2d(Config *cfg) {
 
 	for (i = 0; i < nsteps; i++) {
 		float est_x, est_y, true_x, true_y, err;
+		float trace_p;
 
 		true_x = elem(true_pos, i, 0);
 		true_y = elem(true_pos, i, 1);
@@ -552,6 +557,8 @@ static void run_demo_2d(Config *cfg) {
 		err = sqrt((est_x - true_x) * (est_x - true_x) +
 		           (est_y - true_y) * (est_y - true_y));
 		err_sum += err;
+
+		trace_p = elem(CEst, 0, 0) + elem(CEst, 1, 1);
 
 		if (!cfg->quiet) {
 			/* draw grid */
