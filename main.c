@@ -627,6 +627,9 @@ static void run_demo_2d(Config *cfg) {
 			/* covariance and convergence */
 			printf("  cov diag: %.3f, %.3f  trace(P): %.3f\n",
 				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p);
+			printf("  convergence: ");
+			viz_convergence_bar(trace_p, trace_p0, 20);
+			printf("\n");
 
 			usleep(100000);
 		}
