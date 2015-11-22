@@ -309,6 +309,8 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width) {
 
 	if (trace_p0 <= 0) trace_p0 = 1.0;
 	ratio = 1.0 - trace_p / trace_p0;
+	if (ratio < 0) ratio = 0;
+	if (ratio > 1.0) ratio = 1.0;
 
 	filled = (int)(ratio * width);
 
