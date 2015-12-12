@@ -271,8 +271,8 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	eig(&A, &Vec, &Val);
 
 	/* semi-axis lengths: k * sqrt(eigenvalue), k=2.0 for ~95% */
-	a = 2.0 * sqrt(elem(Val, 0, 0));
-	b = 2.0 * sqrt(elem(Val, 1, 1));
+	a = 2.0 * sqrt(fabs(elem(Val, 0, 0)));
+	b = 2.0 * sqrt(fabs(elem(Val, 1, 1)));
 
 	/* rotation angle from eigenvectors */
 	theta = atan2(elem(Vec, 1, 0), elem(Vec, 0, 0));
