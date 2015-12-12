@@ -317,7 +317,8 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width) {
 	printf("[");
 	viz_color(COL_GREEN);
 	for (i = 0; i < filled; i++) printf("=");
+	if (filled < width) printf(">");
 	viz_color(COL_RESET);
-	for (i = filled; i < width; i++) printf(" ");
+	for (i = filled + 1; i < width; i++) printf(" ");
 	printf("]");
 }
