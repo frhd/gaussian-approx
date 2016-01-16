@@ -47,6 +47,35 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 	return pos;
 }
 
+Scenario *sim_create_scenario(int type, int nsteps, float dt, float noise) {
+	Scenario *s = (Scenario *)malloc(sizeof(Scenario));
+	s->nsteps = nsteps;
+	s->dt = dt;
+	s->true_pos = NULL;
+	s->true_vel = NULL;
+	s->measurements = NULL;
+
+	switch (type) {
+	case SIM_LINE:
+		/* TODO */
+		break;
+	case SIM_CIRCLE:
+		/* TODO */
+		break;
+	case SIM_FIGURE8:
+		/* TODO */
+		break;
+	case SIM_RANDOM:
+		/* TODO */
+		break;
+	default:
+		fprintf(stderr, "unknown trajectory type %d\n", type);
+		break;
+	}
+
+	return s;
+}
+
 void sim_free_scenario(Scenario *s) {
 	if (!s) return;
 	freeMatrix(s->true_pos);
