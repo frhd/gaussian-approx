@@ -47,6 +47,14 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 	return pos;
 }
 
+void sim_free_scenario(Scenario *s) {
+	if (!s) return;
+	freeMatrix(s->true_pos);
+	freeMatrix(s->true_vel);
+	freeMatrix(s->measurements);
+	free(s);
+}
+
 Matrix sim_measurements(Matrix true_pos, float noise_std) {
 	int i, nsteps;
 	Matrix meas;
