@@ -47,32 +47,56 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 	return pos;
 }
 
+/* compute velocity from position differences */
+static Matrix compute_velocities(Matrix pos, float dt) {
+	int i, nsteps;
+	Matrix vel;
+
+	nsteps = pos->height;
+	vel = newMatrix(nsteps, 2);
+
+	/* first step: use forward difference */
+	if (nsteps > 1) {
+		setElem(vel, 0, 0, (elem(pos, 1, 0) - elem(pos, 0, 0)) / dt);
+		setElem(vel, 0, 1, (elem(pos, 1, 1) - elem(pos, 0, 1)) / dt);
+	}
+
+	for (i = 1; i < nsteps; i++) {
+		setElem(vel, i, 0, (elem(pos, i, 0) - elem(pos, i - 1, 0)) / dt);
+		setElem(vel, i, 1, (elem(pos, i, 1) - elem(pos, i - 1, 1)) / dt);
+	}
+
+	return vel;
+}
+
 Scenario *sim_create_scenario(int type, int nsteps, float dt, float noise) {
 	Scenario *s = (Scenario *)malloc(sizeof(Scenario));
 	s->nsteps = nsteps;
 	s->dt = dt;
-	s->true_pos = NULL;
-	s->true_vel = NULL;
-	s->measurements = NULL;
 
 	switch (type) {
 	case SIM_LINE:
-		/* TODO */
+		s->true_pos = sim_trajectory_line(nsteps, dt, 3.0, 1.5);
 		break;
 	case SIM_CIRCLE:
-		/* TODO */
+		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 		break;
 	case SIM_FIGURE8:
 		/* TODO */
+		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 		break;
 	case SIM_RANDOM:
 		/* TODO */
+		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 		break;
 	default:
 		fprintf(stderr, "unknown trajectory type %d\n", type);
+		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 		break;
 	}
 
+	s->true_vel = compute_velocities(s->true_pos, dt);
+	s->measurements = sim_measurements(s->true_pos, noise);
 	return s;
 }
 
