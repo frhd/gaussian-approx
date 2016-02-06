@@ -64,6 +64,25 @@ Matrix sim_trajectory_figure8(int nsteps, float dt, float amplitude) {
 	return pos;
 }
 
+Matrix sim_trajectory_random_walk(int nsteps, float dt) {
+	int i;
+	float x = 0, y = 0;
+	float vx = 1.0, vy = 0.5;
+	Matrix pos = newMatrix(nsteps, 2);
+
+	for (i = 0; i < nsteps; i++) {
+		/* randomly perturb velocity */
+		vx += 0.3 * randn();
+		vy += 0.3 * randn();
+
+		x += vx * dt;
+		y += vy * dt;
+		setElem(pos, i, 0, x);
+		setElem(pos, i, 1, y);
+	}
+	return pos;
+}
+
 /* compute velocity from position differences */
 static Matrix compute_velocities(Matrix pos, float dt) {
 	int i, nsteps;

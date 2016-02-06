@@ -21,6 +21,7 @@ typedef struct {
 Matrix sim_trajectory_line(int nsteps, float dt, float vx, float vy);
 Matrix sim_trajectory_circle(int nsteps, float dt, float radius);
 Matrix sim_trajectory_figure8(int nsteps, float dt, float amplitude);
+Matrix sim_trajectory_random_walk(int nsteps, float dt);
 
 /* generate noisy measurements from true positions */
 Matrix sim_measurements(Matrix true_pos, float noise_std);
