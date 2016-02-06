@@ -469,11 +469,13 @@ static void run_demo_2d(Config *cfg) {
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
+	Scenario *scen;
 	Grid g;
 
-	/* generate trajectory and measurements */
-	true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
-	meas = sim_measurements(true_pos, 2.0);
+	/* generate scenario */
+	scen = sim_create_scenario(SIM_CIRCLE, nsteps, dt, 2.0);
+	true_pos = scen->true_pos;
+	meas = scen->measurements;
 
 	/* auto-scale grid bounds */
 	xmin = xmax = elem(true_pos, 0, 0);
@@ -647,8 +649,7 @@ static void run_demo_2d(Config *cfg) {
 	freeMatrix(Cv);
 	freeMatrix(m_opt);
 	freeMatrix(y);
-	freeMatrix(true_pos);
-	freeMatrix(meas);
+	sim_free_scenario(scen);
 }
 
 static void run_grid_demo(void) {
