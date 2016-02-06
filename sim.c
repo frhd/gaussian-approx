@@ -118,12 +118,10 @@ Scenario *sim_create_scenario(int type, int nsteps, float dt, float noise) {
 		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
 		break;
 	case SIM_FIGURE8:
-		/* TODO */
-		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
+		s->true_pos = sim_trajectory_figure8(nsteps, dt, 5.0);
 		break;
 	case SIM_RANDOM:
-		/* TODO */
-		s->true_pos = sim_trajectory_circle(nsteps, dt, 5.0);
+		s->true_pos = sim_trajectory_random_walk(nsteps, dt);
 		break;
 	default:
 		fprintf(stderr, "unknown trajectory type %d\n", type);
