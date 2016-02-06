@@ -47,6 +47,23 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 	return pos;
 }
 
+Matrix sim_trajectory_figure8(int nsteps, float dt, float amplitude) {
+	int i;
+	float omega = 2.0 * pi / (100.0 * dt);
+	Matrix pos = newMatrix(nsteps, 2);
+
+	for (i = 0; i < nsteps; i++) {
+		float t = i * dt;
+		float x = amplitude * sin(omega * t);
+		float y = amplitude * sin(2.0 * omega * t) / 2.0;
+		x += 0.05 * randn();
+		y += 0.05 * randn();
+		setElem(pos, i, 0, x);
+		setElem(pos, i, 1, y);
+	}
+	return pos;
+}
+
 /* compute velocity from position differences */
 static Matrix compute_velocities(Matrix pos, float dt) {
 	int i, nsteps;
