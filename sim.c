@@ -134,6 +134,16 @@ Scenario *sim_create_scenario(int type, int nsteps, float dt, float noise) {
 	return s;
 }
 
+const char *sim_trajectory_name(int type) {
+	switch (type) {
+	case SIM_LINE:    return "line";
+	case SIM_CIRCLE:  return "circle";
+	case SIM_FIGURE8: return "figure-8";
+	case SIM_RANDOM:  return "random walk";
+	default:          return "unknown";
+	}
+}
+
 void sim_free_scenario(Scenario *s) {
 	if (!s) return;
 	freeMatrix(s->true_pos);

@@ -541,7 +541,7 @@ static void run_demo_2d(Config *cfg) {
 	if (!cfg->quiet) {
 		printf("\033[2J\033[H");
 		printf("2D Kalman tracking demo\n");
-		printf("tracking circular trajectory\n");
+		printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
 		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
 		usleep(1000000);
 	}
@@ -799,8 +799,9 @@ int main(int argc, char *argv[]) {
 	/* print config summary */
 	if (!cfg.quiet) {
 		const char *mnames[] = {"2d", "1d", "test", "grid"};
-		printf("vizga: mode=%s steps=%d dt=%.2f L=%d seed=%s color=%s\n",
-			mnames[cfg.mode], cfg.nsteps, cfg.dt, cfg.L,
+		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s\n",
+			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
+			cfg.nsteps, cfg.dt, cfg.L,
 			cfg.seed >= 0 ? "fixed" : "time",
 			viz_color_enabled ? "on" : "off");
 	}

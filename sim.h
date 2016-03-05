@@ -30,4 +30,7 @@ Matrix sim_measurements(Matrix true_pos, float noise_std);
 Scenario *sim_create_scenario(int type, int nsteps, float dt, float noise);
 void sim_free_scenario(Scenario *s);
 
+/* trajectory type name */
+const char *sim_trajectory_name(int type);
+
 #endif
