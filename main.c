@@ -41,6 +41,14 @@ static void print_usage(const char *prog) {
 	printf("  -h          show this help\n");
 }
 
+static int parse_trajectory(const char *s) {
+	if (strcmp(s, "circle") == 0) return SIM_CIRCLE;
+	if (strcmp(s, "line") == 0) return SIM_LINE;
+	if (strcmp(s, "fig8") == 0) return SIM_FIGURE8;
+	if (strcmp(s, "random") == 0) return SIM_RANDOM;
+	return -1;
+}
+
 /* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
@@ -474,7 +482,7 @@ static void run_demo_2d(Config *cfg) {
 	Grid g;
 
 	/* generate scenario */
-	scen = sim_create_scenario(SIM_CIRCLE, nsteps, dt, 2.0);
+	scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
 	true_pos = scen->true_pos;
 	meas = scen->measurements;
 
@@ -724,12 +732,20 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	while ((opt = getopt(argc, argv, "m:n:d:L:s:qh")) != -1) {
+	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:qh")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
 			if (cfg.mode < 0) {
 				fprintf(stderr, "unknown mode: %s\n", optarg);
+				print_usage(argv[0]);
+				return 1;
+			}
+			break;
+		case 't':
+			cfg.trajectory = parse_trajectory(optarg);
+			if (cfg.trajectory < 0) {
+				fprintf(stderr, "unknown trajectory: %s\n", optarg);
 				print_usage(argv[0]);
 				return 1;
 			}
