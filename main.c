@@ -498,7 +498,12 @@ static void run_demo_2d(Config *cfg) {
 		if (ty < ymin) ymin = ty;
 		if (ty > ymax) ymax = ty;
 	}
-	margin = (xmax - xmin) * 0.2;
+	{
+		float span = xmax - xmin;
+		float yspan = ymax - ymin;
+		if (yspan > span) span = yspan;
+		margin = span * 0.25;
+	}
 	if (margin < 1.0) margin = 1.0;
 	xmin -= margin; xmax += margin;
 	ymin -= margin; ymax += margin;
