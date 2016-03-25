@@ -277,16 +277,15 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	/* rotation angle from eigenvectors */
 	theta = atan2(elem(Vec, 1, 0), elem(Vec, 0, 0));
 
-	/* Bug 5: no terminal aspect ratio compensation
-	 * chars are ~2x taller than wide, should multiply x by 2
-	 * but we don't — ellipse will look squashed horizontally */
-
 	/* plot parametric ellipse */
 	for (i = 0; i < npts; i++) {
-		float ex, ey;
+		float ex, ey, px, py;
 		t = 2.0 * pi * i / npts;
-		ex = cx + a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
-		ey = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
+		px = a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
+		py = a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
+		/* scale x by aspect ratio to compensate for char height:width ~2:1 */
+		ex = cx + px * 2.0;
+		ey = cy + py;
 
 		/* only plot if inside grid bounds (with some margin) */
 		if (ex >= g->xmin && ex <= g->xmax && ey >= g->ymin && ey <= g->ymax) {
