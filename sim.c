@@ -5,7 +5,7 @@
 #include "noise.h"
 #include "tracker.h"
 
-/* Box-Muller transform */
+/* Box-Muller N(0,1) */
 float randn(void) {
 	float u1, u2;
 	do {
@@ -38,7 +38,6 @@ Matrix sim_trajectory_circle(int nsteps, float dt, float radius) {
 		float t = i * dt;
 		float x = radius * cos(omega * t);
 		float y = radius * sin(omega * t);
-		/* add small process noise */
 		x += 0.05 * randn();
 		y += 0.05 * randn();
 		setElem(pos, i, 0, x);
