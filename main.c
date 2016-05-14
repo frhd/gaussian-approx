@@ -549,7 +549,17 @@ static void run_demo_2d(Config *cfg) {
 		printf("2D Kalman tracking demo\n");
 		printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
 		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
-		usleep(1000000);
+
+		/* show trajectory preview */
+		viz_grid_init(&g, xmin, xmax, ymin, ymax);
+		for (i = 0; i < nsteps; i++)
+			viz_grid_point(&g, elem(true_pos, i, 0), elem(true_pos, i, 1), '.');
+		viz_grid_print(&g);
+		printf("\n");
+		viz_color(COL_DIM);
+		printf("  trajectory preview — press enter or wait...\n");
+		viz_color(COL_RESET);
+		usleep(2000000);
 	}
 
 	for (i = 0; i < nsteps; i++) {
