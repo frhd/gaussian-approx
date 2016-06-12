@@ -39,4 +39,10 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch);
 void viz_color(const char *code);
 void viz_convergence_bar(float trace_p, float trace_p0, int width);
 
+/* terminal raw mode for interactive input */
+void term_raw_mode(void);
+void term_restore(void);
+int  term_kbhit(void);
+int  term_getchar(void);
+
 #endif

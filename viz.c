@@ -327,3 +327,38 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width) {
 	for (i = filled + 1; i < width; i++) printf(" ");
 	printf("]");
 }
+
+void term_restore(void) {
+	if (raw_mode_active) {
+		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+		raw_mode_active = 0;
+	}
+}
+
+void term_raw_mode(void) {
+	struct termios raw;
+
+	if (!isatty(STDIN_FILENO)) return;
+
+	tcgetattr(STDIN_FILENO, &orig_termios);
+	raw = orig_termios;
+	raw.c_lflag &= ~(ICANON | ECHO);
+	raw.c_cc[VMIN] = 0;
+	raw.c_cc[VTIME] = 0;
+	tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+	raw_mode_active = 1;
+	atexit(term_restore);
+}
+
+int term_kbhit(void) {
+	int n = 0;
+	ioctl(STDIN_FILENO, FIONREAD, &n);
+	return n > 0;
+}
+
+int term_getchar(void) {
+	unsigned char c;
+	if (read(STDIN_FILENO, &c, 1) == 1)
+		return c;
+	return -1;
+}
