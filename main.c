@@ -27,6 +27,8 @@ typedef struct {
 	int quiet;
 	int color;
 	int trajectory;
+	int interactive;
+	int speed;
 } Config;
 
 static void print_usage(const char *prog) {
@@ -736,6 +738,8 @@ int main(int argc, char *argv[]) {
 	cfg.quiet = 0;
 	cfg.color = 1;
 	cfg.trajectory = SIM_CIRCLE;
+	cfg.interactive = 0;
+	cfg.speed = 100;
 
 	/* check for --no-color before getopt */
 	for (i = 1; i < argc; i++) {
