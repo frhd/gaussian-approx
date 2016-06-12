@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <termios.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 #include "viz.h"
 #include "eig.h"
 #include "tracker.h"
+
+static struct termios orig_termios;
+static int raw_mode_active = 0;
 
 int viz_color_enabled = 1;
 
