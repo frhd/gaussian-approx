@@ -41,6 +41,7 @@ static void print_usage(const char *prog) {
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
 	printf("  -q          quiet mode (final result only)\n");
 	printf("  -i          interactive mode (step with keyboard)\n");
+	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  -h          show this help\n");
 }
@@ -742,13 +743,18 @@ int main(int argc, char *argv[]) {
 	cfg.interactive = 0;
 	cfg.speed = 100;
 
-	/* check for --no-color before getopt */
+	/* check for gnu-style long options before getopt */
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--no-color") == 0) {
 			cfg.color = 0;
-			/* shift args */
 			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
 			argc--;
+			i--;
+		} else if (strcmp(argv[i], "--speed") == 0 && i + 1 < argc) {
+			cfg.speed = atoi(argv[i + 1]);
+			if (cfg.speed <= 0) cfg.speed = 100;
+			memmove(&argv[i], &argv[i + 2], (argc - i - 2) * sizeof(char *));
+			argc -= 2;
 			i--;
 		}
 	}
