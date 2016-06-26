@@ -40,6 +40,7 @@ static void print_usage(const char *prog) {
 	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
 	printf("  -q          quiet mode (final result only)\n");
+	printf("  -i          interactive mode (step with keyboard)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  -h          show this help\n");
 }
@@ -752,7 +753,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:qh")) != -1) {
+	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:qih")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -796,6 +797,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'q':
 			cfg.quiet = 1;
+			break;
+		case 'i':
+			cfg.interactive = 1;
 			break;
 		case 'h':
 			print_usage(argv[0]);
