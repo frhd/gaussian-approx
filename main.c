@@ -829,11 +829,13 @@ int main(int argc, char *argv[]) {
 	/* print config summary */
 	if (!cfg.quiet) {
 		const char *mnames[] = {"2d", "1d", "test", "grid"};
-		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s\n",
+		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms\n",
 			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
 			cfg.nsteps, cfg.dt, cfg.L,
 			cfg.seed >= 0 ? "fixed" : "time",
-			viz_color_enabled ? "on" : "off");
+			viz_color_enabled ? "on" : "off",
+			cfg.interactive ? " interactive" : "",
+			cfg.speed);
 	}
 
 	switch (cfg.mode) {
