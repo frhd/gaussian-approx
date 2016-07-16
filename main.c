@@ -341,6 +341,33 @@ static void run_tests(void) {
 	printf("\nall tests done\n");
 }
 
+/* process keyboard input, return 1 if should advance step, -1 if quit */
+static int handle_input(int *paused, int *speed) {
+	while (term_kbhit()) {
+		int ch = term_getchar();
+		if (ch == 'q' || ch == 'Q') return -1;
+		if (ch == ' ' || ch == '\n' || ch == '\r') {
+			*paused = 1;
+			return 1;
+		}
+		if (ch == 'r' || ch == 'R') {
+			*paused = 0;
+		}
+		if (ch == 'p' || ch == 'P') {
+			*paused = 1;
+		}
+		if (ch == '+' || ch == '=') {
+			*speed -= 20;
+			if (*speed < 10) *speed = 10;
+		}
+		if (ch == '-') {
+			*speed += 20;
+			if (*speed > 500) *speed = 500;
+		}
+	}
+	return 0;
+}
+
 static void run_demo(Config *cfg) {
 	int i;
 	float dt = cfg->dt;
