@@ -477,6 +477,15 @@ static void run_demo(Config *cfg) {
 			viz_color(COL_BOLD);
 			printf("[step %d/%d]", i + 1, nsteps);
 			viz_color(COL_RESET);
+			printf("  ");
+			if (paused) {
+				viz_color(COL_YELLOW);
+				printf("[PAUSED]");
+			} else {
+				viz_color(COL_GREEN);
+				printf("[RUNNING]");
+			}
+			viz_color(COL_RESET);
 			printf("\n\n");
 
 			viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
