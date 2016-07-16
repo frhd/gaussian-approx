@@ -376,6 +376,7 @@ static void run_demo(Config *cfg) {
 	float true_pos, true_vel;
 	float meas;
 	float err_sum = 0;
+	int paused, speed;
 
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
@@ -417,7 +418,13 @@ static void run_demo(Config *cfg) {
 	/* measurement vector */
 	y = newMatrix(1, 1);
 
+	paused = cfg->interactive;
+	speed = cfg->speed;
+
 	if (!cfg->quiet) {
+		if (cfg->interactive)
+			term_raw_mode();
+
 		printf("\033[2J\033[H");
 		printf("1D Kalman tracking demo\n");
 		printf("tracking constant velocity target\n");
@@ -425,8 +432,24 @@ static void run_demo(Config *cfg) {
 		usleep(1000000);
 	}
 
-	for (i = 0; i < nsteps; i++) {
+	for (i = 0; i < nsteps; ) {
 		float est_pos, est_var, err;
+		int ret;
+
+		if (!cfg->quiet && cfg->interactive) {
+			/* wait for input in interactive mode */
+			while (paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) goto done_1d;
+				if (ret == 1) break;
+				usleep(20000);
+			}
+			/* also check for input in run mode */
+			if (!paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) goto done_1d;
+			}
+		}
 
 		/* propagate true state */
 		true_pos += true_vel * dt + 0.01 * randn();
@@ -483,7 +506,13 @@ static void run_demo(Config *cfg) {
 
 			usleep(200000);
 		}
+
+		i++;
 	}
+
+done_1d:
+	if (!cfg->quiet && cfg->interactive)
+		term_restore();
 
 	printf("\n--- summary ---\n");
 	printf("mean abs error: %.3f\n", err_sum / nsteps);
