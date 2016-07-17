@@ -513,6 +513,12 @@ static void run_demo(Config *cfg) {
 			printf("  error      : %7.3f\n", err);
 			printf("  variance   : %7.3f\n", est_var);
 
+			if (i == 0 && cfg->interactive) {
+				viz_color(COL_DIM);
+				printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
+				viz_color(COL_RESET);
+			}
+
 			usleep(200000);
 		}
 
