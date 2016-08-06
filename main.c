@@ -551,6 +551,7 @@ static void run_demo_2d(Config *cfg) {
 	float err_sum = 0;
 	float xmin, xmax, ymin, ymax, margin;
 	float trace_p0;
+	int paused, speed;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -619,7 +620,13 @@ static void run_demo_2d(Config *cfg) {
 	/* initial trace for convergence indicator */
 	trace_p0 = elem(CEst, 0, 0) + elem(CEst, 1, 1);
 
+	paused = cfg->interactive;
+	speed = cfg->speed;
+
 	if (!cfg->quiet) {
+		if (cfg->interactive)
+			term_raw_mode();
+
 		printf("\033[2J\033[H");
 		printf("2D Kalman tracking demo\n");
 		printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
@@ -637,9 +644,23 @@ static void run_demo_2d(Config *cfg) {
 		usleep(2000000);
 	}
 
-	for (i = 0; i < nsteps; i++) {
+	for (i = 0; i < nsteps; ) {
 		float est_x, est_y, true_x, true_y, err;
 		float trace_p;
+		int ret;
+
+		if (!cfg->quiet && cfg->interactive) {
+			while (paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) goto done_2d;
+				if (ret == 1) break;
+				usleep(20000);
+			}
+			if (!paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) goto done_2d;
+			}
+		}
 
 		true_x = elem(true_pos, i, 0);
 		true_y = elem(true_pos, i, 1);
@@ -735,7 +756,13 @@ static void run_demo_2d(Config *cfg) {
 
 			usleep(100000);
 		}
+
+		i++;
 	}
+
+done_2d:
+	if (!cfg->quiet && cfg->interactive)
+		term_restore();
 
 	printf("\n--- summary ---\n");
 	printf("mean rmse: %.3f\n", err_sum / nsteps);
