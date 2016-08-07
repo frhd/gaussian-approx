@@ -756,12 +756,21 @@ static void run_demo_2d(Config *cfg) {
 				printf("\n");
 			}
 
+			/* state vector */
+			printf("  vel: (%.3f, %.3f)\n", elem(xEst, 2, 0), elem(xEst, 3, 0));
+
 			/* covariance and convergence */
 			printf("  cov diag: %.3f, %.3f  trace(P): %.3f\n",
 				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p);
 			printf("  convergence: ");
 			viz_convergence_bar(trace_p, trace_p0, 20);
 			printf("\n");
+
+			if (i == 0 && cfg->interactive) {
+				viz_color(COL_DIM);
+				printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
+				viz_color(COL_RESET);
+			}
 
 			usleep(100000);
 		}
