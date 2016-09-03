@@ -540,7 +540,7 @@ done_1d:
 		term_restore();
 
 	printf("\n--- summary ---\n");
-	printf("mean abs error: %.3f\n", err_sum / nsteps);
+	printf("mean abs error: %.3f\n", err_sum / (i > 0 ? i : 1));
 	printf("final pos estimate: %.3f (true: %.3f)\n",
 		elem(xEst, 0, 0), true_pos);
 	printf("final variance: %.3f\n", elem(CEst, 0, 0));
@@ -803,7 +803,7 @@ done_2d:
 		term_restore();
 
 	printf("\n--- summary ---\n");
-	printf("mean rmse: %.3f\n", err_sum / nsteps);
+	printf("mean rmse: %.3f\n", err_sum / (i > 0 ? i : 1));
 	printf("final estimate: (%.3f, %.3f)\n", elem(xEst, 0, 0), elem(xEst, 1, 0));
 	printf("final truth:    (%.3f, %.3f)\n",
 		elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
