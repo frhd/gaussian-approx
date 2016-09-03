@@ -377,6 +377,7 @@ static void run_demo(Config *cfg) {
 	float meas;
 	float err_sum = 0;
 	int paused, speed;
+	float innov = 0;
 
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
@@ -459,6 +460,13 @@ static void run_demo(Config *cfg) {
 		meas = true_pos + 2.0 * randn();
 		setElem(y, 0, 0, meas);
 
+		/* predicted measurement for innovation */
+		{
+			Matrix hpred = hfun_1d(xEst);
+			innov = meas - elem(hpred, 0, 0);
+			freeMatrix(hpred);
+		}
+
 		/* predict */
 		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_1d, &dt, &m_opt);
 
@@ -512,6 +520,8 @@ static void run_demo(Config *cfg) {
 			printf(" truth    : %7.3f\n", true_pos);
 			printf("  error      : %7.3f\n", err);
 			printf("  variance   : %7.3f\n", est_var);
+			printf("  velocity   : %7.3f\n", elem(xEst, 1, 0));
+			printf("  innovation : %7.3f\n", innov);
 
 			if (i == 0 && cfg->interactive) {
 				viz_color(COL_DIM);
@@ -552,6 +562,7 @@ static void run_demo_2d(Config *cfg) {
 	float xmin, xmax, ymin, ymax, margin;
 	float trace_p0;
 	int paused, speed;
+	float innov_x = 0, innov_y = 0;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -669,6 +680,14 @@ static void run_demo_2d(Config *cfg) {
 		setElem(y, 0, 0, elem(meas, i, 0));
 		setElem(y, 1, 0, elem(meas, i, 1));
 
+		/* compute innovation before prediction */
+		{
+			Matrix hpred = hfun_2d(xEst);
+			innov_x = elem(meas, i, 0) - elem(hpred, 0, 0);
+			innov_y = elem(meas, i, 1) - elem(hpred, 1, 0);
+			freeMatrix(hpred);
+		}
+
 		/* predict */
 		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_2d, &dt, &m_opt);
 
@@ -757,7 +776,8 @@ static void run_demo_2d(Config *cfg) {
 			}
 
 			/* state vector */
-			printf("  vel: (%.3f, %.3f)\n", elem(xEst, 2, 0), elem(xEst, 3, 0));
+			printf("  vel: (%.3f, %.3f)  ", elem(xEst, 2, 0), elem(xEst, 3, 0));
+			printf("innov: (%.3f, %.3f)\n", innov_x, innov_y);
 
 			/* covariance and convergence */
 			printf("  cov diag: %.3f, %.3f  trace(P): %.3f\n",
