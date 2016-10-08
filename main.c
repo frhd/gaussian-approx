@@ -529,7 +529,8 @@ static void run_demo(Config *cfg) {
 				viz_color(COL_RESET);
 			}
 
-			usleep(200000);
+			/* Bug 8: speed variable not used here, hardcoded sleep */
+			usleep(100000);
 		}
 
 		i++;
@@ -792,6 +793,7 @@ static void run_demo_2d(Config *cfg) {
 				viz_color(COL_RESET);
 			}
 
+			/* Bug 8: speed variable not used here, hardcoded sleep */
 			usleep(100000);
 		}
 
