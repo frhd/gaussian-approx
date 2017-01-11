@@ -12,6 +12,7 @@
 #include "tracker.h"
 #include "viz.h"
 #include "sim.h"
+#include "export.h"
 
 #define MODE_2D   0
 #define MODE_1D   1
@@ -29,6 +30,7 @@ typedef struct {
 	int trajectory;
 	int interactive;
 	int speed;
+	char *outfile;
 } Config;
 
 static void print_usage(const char *prog) {
@@ -39,6 +41,7 @@ static void print_usage(const char *prog) {
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
 	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
+	printf("  -o <file>   export data to CSV file\n");
 	printf("  -q          quiet mode (final result only)\n");
 	printf("  -i          interactive mode (step with keyboard)\n");
 	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
@@ -880,6 +883,7 @@ int main(int argc, char *argv[]) {
 	cfg.trajectory = SIM_CIRCLE;
 	cfg.interactive = 0;
 	cfg.speed = 100;
+	cfg.outfile = NULL;
 
 	/* check for gnu-style long options before getopt */
 	for (i = 1; i < argc; i++) {
