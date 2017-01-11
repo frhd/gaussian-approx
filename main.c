@@ -901,7 +901,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:qih")) != -1) {
+	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:o:qih")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -942,6 +942,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 's':
 			cfg.seed = atoi(optarg);
+			break;
+		case 'o':
+			cfg.outfile = optarg;
 			break;
 		case 'q':
 			cfg.quiet = 1;
