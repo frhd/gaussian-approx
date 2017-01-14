@@ -572,6 +572,7 @@ static void run_demo_2d(Config *cfg) {
 	Matrix true_pos, meas;
 	Scenario *scen;
 	Grid g;
+	FILE *expf = NULL;
 
 	/* generate scenario */
 	scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
@@ -634,6 +635,13 @@ static void run_demo_2d(Config *cfg) {
 
 	/* initial trace for convergence indicator */
 	trace_p0 = elem(CEst, 0, 0) + elem(CEst, 1, 1);
+
+	/* open export file if requested */
+	if (cfg->outfile) {
+		expf = export_open(cfg->outfile);
+		if (expf)
+			export_header_2d(expf);
+	}
 
 	paused = cfg->interactive;
 	speed = cfg->speed;
@@ -705,6 +713,17 @@ static void run_demo_2d(Config *cfg) {
 		err_sum += err;
 
 		trace_p = elem(CEst, 0, 0) + elem(CEst, 1, 1);
+
+		/* export row if file is open */
+		if (expf) {
+			export_row_2d(expf, i, i * dt,
+				true_x, true_y,
+				elem(meas, i, 0), elem(meas, i, 1),
+				est_x, est_y,
+				elem(xEst, 2, 0), elem(xEst, 3, 0),
+				elem(CEst, 0, 0), elem(CEst, 1, 1),
+				err_sum / (i + 1));
+		}
 
 		if (!cfg->quiet) {
 			/* draw grid */
@@ -812,6 +831,9 @@ done_2d:
 	printf("final estimate: (%.3f, %.3f)\n", elem(xEst, 0, 0), elem(xEst, 1, 0));
 	printf("final truth:    (%.3f, %.3f)\n",
 		elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+
+	if (expf)
+		export_close(expf);
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
