@@ -384,6 +384,7 @@ static void run_demo(Config *cfg) {
 
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
+	FILE *expf = NULL;
 
 	/* initial state estimate [pos, vel, 0, 0, 0, 0] */
 	xEst = zeroMatrix(6, 1);
@@ -421,6 +422,13 @@ static void run_demo(Config *cfg) {
 
 	/* measurement vector */
 	y = newMatrix(1, 1);
+
+	/* open export file if requested */
+	if (cfg->outfile) {
+		expf = export_open(cfg->outfile);
+		if (expf)
+			export_header_1d(expf);
+	}
 
 	paused = cfg->interactive;
 	speed = cfg->speed;
@@ -480,6 +488,12 @@ static void run_demo(Config *cfg) {
 		est_var = elem(CEst, 0, 0);
 		err = fabs(est_pos - true_pos);
 		err_sum += err;
+
+		if (expf) {
+			export_row_1d(expf, i, i * dt,
+				true_pos, meas, est_pos, elem(xEst, 1, 0),
+				est_var, err_sum / (i + 1));
+		}
 
 		if (!cfg->quiet) {
 			/* display */
@@ -548,6 +562,9 @@ done_1d:
 	printf("final pos estimate: %.3f (true: %.3f)\n",
 		elem(xEst, 0, 0), true_pos);
 	printf("final variance: %.3f\n", elem(CEst, 0, 0));
+
+	if (expf)
+		export_close(expf);
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
