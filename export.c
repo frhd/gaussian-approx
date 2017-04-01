@@ -1,5 +1,5 @@
+/* csv export for filter state history */
 #include <stdio.h>
-#include <stdlib.h>
 #include "export.h"
 
 FILE *export_open(const char *filename) {
