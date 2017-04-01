@@ -426,8 +426,10 @@ static void run_demo(Config *cfg) {
 	/* open export file if requested */
 	if (cfg->outfile) {
 		expf = export_open(cfg->outfile);
-		if (expf)
+		if (expf) {
 			export_header_1d(expf);
+			printf("Exporting to: %s\n", cfg->outfile);
+		}
 	}
 
 	paused = cfg->interactive;
@@ -656,8 +658,10 @@ static void run_demo_2d(Config *cfg) {
 	/* open export file if requested */
 	if (cfg->outfile) {
 		expf = export_open(cfg->outfile);
-		if (expf)
+		if (expf) {
 			export_header_2d(expf);
+			printf("Exporting to: %s\n", cfg->outfile);
+		}
 	}
 
 	paused = cfg->interactive;
