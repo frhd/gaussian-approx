@@ -14,6 +14,7 @@ set title "Position: True vs Estimated"
 set xlabel "time"
 set ylabel "position"
 plot filename using 2:3 with lines title "true x", \
+     filename using 2:5 with points title "meas x", \
      filename using 2:7 with lines title "est x"
 
 # plot 2: estimation error
