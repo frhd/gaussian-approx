@@ -57,7 +57,8 @@ static int parse_trajectory(const char *s) {
 	return -1;
 }
 
-/* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0] */
+/* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0]
+ * padded to 6d because gaussianEstimator assumes it internally */
 Matrix afun_1d(Matrix m, float dt) {
 	int j;
 	Matrix out = newMatrix(m->height, m->width);

@@ -5,7 +5,8 @@
 #include "noise.h"
 #include "tracker.h"
 
-/* Box-Muller N(0,1) */
+/* Box-Muller transform — generates N(0,1) samples.
+ * uses rejection for u1=0 to avoid log(0) */
 float randn(void) {
 	float u1, u2;
 	do {
@@ -82,7 +83,8 @@ Matrix sim_trajectory_random_walk(int nsteps, float dt) {
 	return pos;
 }
 
-/* compute velocity from position differences */
+/* compute velocity from position via finite differences.
+ * first step uses forward diff, rest use backward */
 static Matrix compute_velocities(Matrix pos, float dt) {
 	int i, nsteps;
 	Matrix vel;

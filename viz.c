@@ -276,7 +276,7 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	Val = newMatrix(2, 2);
 	eig(&A, &Vec, &Val);
 
-	/* semi-axis lengths: k * sqrt(eigenvalue), k=2.0 for ~95% */
+	/* semi-axis lengths: k * sqrt(eigenvalue), k=2.0 for ~95% confidence */
 	a = 2.0 * sqrt(fabs(elem(Val, 0, 0)));
 	b = 2.0 * sqrt(fabs(elem(Val, 1, 1)));
 
