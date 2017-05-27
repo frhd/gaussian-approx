@@ -518,6 +518,9 @@ static void run_demo(Config *cfg) {
 
 			viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
 
+			/* DEBUG: tracking matrix allocs in display loop */
+			fprintf(stderr, "[dbg] step %d: displaying scaled cov\n", i);
+
 			/* Bug 3: mulScalarMatrix result not freed (memory leak) */
 			printf("\nscaled covariance:\n");
 			printMatrix(mulScalarMatrix(100.0, CEst));
