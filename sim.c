@@ -147,9 +147,9 @@ const char *sim_trajectory_name(int type) {
 
 void sim_free_scenario(Scenario *s) {
 	if (!s) return;
-	freeMatrix(s->true_pos);
-	freeMatrix(s->true_vel);
-	freeMatrix(s->measurements);
+	if (s->true_pos) freeMatrix(s->true_pos);
+	if (s->true_vel) freeMatrix(s->true_vel);
+	if (s->measurements) freeMatrix(s->measurements);
 	free(s);
 }
 
