@@ -982,10 +982,6 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'L':
 			cfg.L = atoi(optarg);
-			if (cfg.L != 3 && cfg.L != 5 && cfg.L != 7) {
-				fprintf(stderr, "L must be 3, 5, or 7\n");
-				return 1;
-			}
 			break;
 		case 's':
 			cfg.seed = atoi(optarg);
@@ -1006,6 +1002,12 @@ int main(int argc, char *argv[]) {
 			print_usage(argv[0]);
 			return 1;
 		}
+	}
+
+	/* validate L */
+	if (cfg.L != 3 && cfg.L != 5 && cfg.L != 7) {
+		fprintf(stderr, "warning: L=%d not supported, using L=7\n", cfg.L);
+		cfg.L = 7;
 	}
 
 	/* seed rng */
