@@ -355,7 +355,7 @@ void term_raw_mode(void) {
 	raw.c_cc[VTIME] = 0;
 	tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 	raw_mode_active = 1;
-	atexit(term_restore);
+	atexit(term_restore);	/* safe to call multiple times */
 }
 
 int term_kbhit(void) {
