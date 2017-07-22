@@ -383,6 +383,11 @@ static void run_demo(Config *cfg) {
 	int paused, speed;
 	float innov = 0;
 
+	if (nsteps <= 0) {
+		printf("nothing to do (nsteps=0)\n");
+		return;
+	}
+
 	/* filter state — use 6d to match estimator internals */
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	FILE *expf = NULL;
@@ -587,6 +592,11 @@ static void run_demo_2d(Config *cfg) {
 	int L = cfg->L;
 	float err_sum = 0;
 	float xmin, xmax, ymin, ymax, margin;
+
+	if (nsteps <= 0) {
+		printf("nothing to do (nsteps=0)\n");
+		return;
+	}
 	float trace_p0;
 	int paused, speed;
 	float innov_x = 0, innov_y = 0;
