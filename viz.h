@@ -23,11 +23,13 @@ typedef struct {
 	float xmin, xmax, ymin, ymax;
 } Grid;
 
+/* 1d visualization */
 void viz_bar(float value, float max_val, int width);
 void viz_vector(Matrix v);
 void viz_gaussian_1d(float mean, float sigma, int width, int height);
 void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width);
 
+/* 2d grid */
 void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax);
 void viz_grid_print(Grid *g);
 int  viz_grid_map_x(Grid *g, float x);
@@ -36,6 +38,7 @@ void viz_grid_point(Grid *g, float x, float y, char ch);
 void viz_grid_trajectory(Grid *g, Matrix xs, Matrix ys, char ch);
 void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch);
 
+/* color and display helpers */
 void viz_color(const char *code);
 void viz_convergence_bar(float trace_p, float trace_p0, int width);
 
