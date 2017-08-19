@@ -702,6 +702,7 @@ static void run_demo_2d(Config *cfg) {
 		usleep(2000000);
 	}
 
+	/* main filter loop — no temp matrix allocs inside, checked Aug 2017 */
 	for (i = 0; i < nsteps; ) {
 		float est_x, est_y, true_x, true_y, err;
 		float trace_p;
