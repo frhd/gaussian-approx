@@ -609,6 +609,10 @@ static void run_demo_2d(Config *cfg) {
 
 	/* generate scenario */
 	scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
+	if (!scen) {
+		fprintf(stderr, "failed to create scenario\n");
+		return;
+	}
 	true_pos = scen->true_pos;
 	meas = scen->measurements;
 
