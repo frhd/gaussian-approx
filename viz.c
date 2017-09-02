@@ -191,7 +191,7 @@ void viz_grid_print(Grid *g) {
 		}
 		for (c = 0; c < GRID_W; c++) {
 			char ch = g->cells[r][c];
-			if (ch == '.' ) {
+			if (ch == '.') {
 				viz_color(COL_GREEN);
 				putchar(ch);
 				viz_color(COL_RESET);
