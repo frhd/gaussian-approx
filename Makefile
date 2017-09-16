@@ -15,3 +15,5 @@ clean:
 
 run: vizga
 	./vizga
+
+.PHONY: clean run
