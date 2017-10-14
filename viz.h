@@ -23,6 +23,12 @@ typedef struct {
 	float xmin, xmax, ymin, ymax;
 } Grid;
 
+/* panel layout */
+typedef struct {
+	int row, col;
+	int width, height;
+} Panel;
+
 /* 1d visualization */
 void viz_bar(float value, float max_val, int width);
 void viz_vector(Matrix v);
