@@ -48,6 +48,9 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch);
 void viz_color(const char *code);
 void viz_convergence_bar(float trace_p, float trace_p0, int width);
 
+/* panel layout */
+void viz_cursor_move(int row, int col);
+
 /* terminal raw mode for interactive input */
 void term_raw_mode(void);
 void term_restore(void);
