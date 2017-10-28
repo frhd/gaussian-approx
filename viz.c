@@ -336,6 +336,10 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width) {
 	printf("]");
 }
 
+void viz_cursor_move(int row, int col) {
+	printf("\033[%d;%dH", row, col);
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
