@@ -340,6 +340,17 @@ void viz_cursor_move(int row, int col) {
 	printf("\033[%d;%dH", row, col);
 }
 
+void viz_clear_screen(void) {
+	printf("\033[2J\033[H");
+}
+
+int viz_term_width(void) {
+	struct winsize ws;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0)
+		return ws.ws_col;
+	return 80;
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
