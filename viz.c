@@ -351,6 +351,31 @@ int viz_term_width(void) {
 	return 80;
 }
 
+void viz_panel_border(Panel *p) {
+	int r, c;
+	/* top border */
+	viz_cursor_move(p->row, p->col);
+	viz_color(COL_DIM);
+	putchar('+');
+	for (c = 1; c < p->width - 1; c++) putchar('-');
+	putchar('+');
+
+	/* bottom border */
+	viz_cursor_move(p->row + p->height - 1, p->col);
+	putchar('+');
+	for (c = 1; c < p->width - 1; c++) putchar('-');
+	putchar('+');
+
+	/* side borders */
+	for (r = 1; r < p->height - 1; r++) {
+		viz_cursor_move(p->row + r, p->col);
+		putchar('|');
+		viz_cursor_move(p->row + r, p->col + p->width - 1);
+		putchar('|');
+	}
+	viz_color(COL_RESET);
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);

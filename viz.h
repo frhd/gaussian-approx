@@ -50,6 +50,7 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width);
 
 /* panel layout */
 void viz_cursor_move(int row, int col);
+void viz_panel_border(Panel *p);
 void viz_clear_screen(void);
 int  viz_term_width(void);
 
