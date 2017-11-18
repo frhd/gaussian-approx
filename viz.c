@@ -376,6 +376,13 @@ void viz_panel_border(Panel *p) {
 	viz_color(COL_RESET);
 }
 
+void viz_panel_text(Panel *p, int line, const char *text) {
+	int maxw = p->width - 2;
+	if (line < 0 || line >= p->height - 2) return;
+	viz_cursor_move(p->row + 1 + line, p->col + 1);
+	printf("%-*.*s", maxw, maxw, text);
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
