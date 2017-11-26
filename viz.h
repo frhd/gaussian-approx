@@ -38,6 +38,7 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width);
 /* 2d grid */
 void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax);
 void viz_grid_print(Grid *g);
+void viz_grid_print_at(Grid *g, int row, int col);
 int  viz_grid_map_x(Grid *g, float x);
 int  viz_grid_map_y(Grid *g, float y);
 void viz_grid_point(Grid *g, float x, float y, char ch);
