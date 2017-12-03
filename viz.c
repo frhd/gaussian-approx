@@ -230,6 +230,63 @@ void viz_grid_print(Grid *g) {
 	viz_color(COL_RESET);
 }
 
+void viz_grid_print_at(Grid *g, int row, int col) {
+	int r, c;
+	char label[16];
+	float yval, xmid;
+
+	for (r = 0; r < GRID_H; r++) {
+		viz_cursor_move(row + r, col);
+		yval = g->ymax - (g->ymax - g->ymin) * r / (GRID_H - 1);
+		if (r == 0 || r == GRID_H / 2 || r == GRID_H - 1) {
+			snprintf(label, sizeof(label), "%6.2f ", yval);
+			printf("%s", label);
+		} else {
+			printf("       ");
+		}
+		for (c = 0; c < GRID_W; c++) {
+			char ch = g->cells[r][c];
+			if (ch == '.') {
+				viz_color(COL_GREEN);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == 'o') {
+				viz_color(COL_YELLOW);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '+' && (r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1)) {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '+') {
+				viz_color(COL_CYAN);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '~') {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else if (ch == '|' || ch == '-') {
+				viz_color(COL_DIM);
+				putchar(ch);
+				viz_color(COL_RESET);
+			} else {
+				putchar(ch);
+			}
+		}
+	}
+
+	/* x axis labels */
+	xmid = (g->xmin + g->xmax) / 2.0;
+	viz_cursor_move(row + GRID_H, col);
+	viz_color(COL_DIM);
+	printf("       %-*.*f", GRID_W / 2, 2, g->xmin);
+	printf("%*.2f", GRID_W - GRID_W / 2, g->xmax);
+	viz_cursor_move(row + GRID_H + 1, col);
+	printf("       %*s%.2f", GRID_W / 2 - 2, "", xmid);
+	viz_color(COL_RESET);
+}
+
 int viz_grid_map_x(Grid *g, float x) {
 	int cx = 1 + (int)((x - g->xmin) / (g->xmax - g->xmin) * (GRID_W - 3));
 	if (cx < 1) cx = 1;
