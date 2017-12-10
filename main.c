@@ -372,6 +372,61 @@ static int handle_input(int *paused, int *speed) {
 	return 0;
 }
 
+
+/* 1d layout — curve at top, state info below */
+static void render_frame_1d(float est_pos, float est_var, float meas,
+	float true_pos, float err, float innov, int step, int nsteps,
+	float vel, int paused, int interactive) {
+
+	viz_clear_screen();
+
+	/* header */
+	viz_cursor_move(1, 1);
+	printf("1D Kalman tracking demo  ");
+	viz_color(COL_BOLD);
+	printf("[step %d/%d]", step + 1, nsteps);
+	viz_color(COL_RESET);
+	printf("  ");
+	if (paused) {
+		viz_color(COL_YELLOW);
+		printf("[PAUSED]");
+	} else {
+		viz_color(COL_GREEN);
+		printf("[RUNNING]");
+	}
+	viz_color(COL_RESET);
+
+	/* gaussian curve — printed sequentially (uses printf directly) */
+	viz_cursor_move(3, 1);
+	viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
+
+	/* state info below the curve */
+	/* cursor is already below the curve output */
+	printf("\n");
+
+	printf("  ");
+	viz_color(COL_CYAN);
+	printf("*");
+	viz_color(COL_RESET);
+	printf(" estimate : %7.3f\n", est_pos);
+	printf("  ");
+	viz_color(COL_YELLOW);
+	printf("o");
+	viz_color(COL_RESET);
+	printf(" measured : %7.3f\n", meas);
+	printf("  ");
+	viz_color(COL_GREEN);
+	printf("x");
+	viz_color(COL_RESET);
+	printf(" truth    : %7.3f\n", true_pos);
+	printf("  error      : %7.3f\n", err);
+	printf("  variance   : %7.3f\n", est_var);
+	printf("  velocity   : %7.3f\n", vel);
+	printf("  innovation : %7.3f\n", innov);
+
+	fflush(stdout);
+}
+
 static void run_demo(Config *cfg) {
 	int i;
 	float dt = cfg->dt;
@@ -445,7 +500,7 @@ static void run_demo(Config *cfg) {
 		if (cfg->interactive)
 			term_raw_mode();
 
-		printf("\033[2J\033[H");
+		viz_clear_screen();
 		printf("1D Kalman tracking demo\n");
 		printf("tracking constant velocity target\n");
 		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
@@ -504,58 +559,8 @@ static void run_demo(Config *cfg) {
 		}
 
 		if (!cfg->quiet) {
-			/* display */
-			printf("\033[2J\033[H");
-			printf("1D Kalman tracking demo  ");
-			viz_color(COL_BOLD);
-			printf("[step %d/%d]", i + 1, nsteps);
-			viz_color(COL_RESET);
-			printf("  ");
-			if (paused) {
-				viz_color(COL_YELLOW);
-				printf("[PAUSED]");
-			} else {
-				viz_color(COL_GREEN);
-				printf("[RUNNING]");
-			}
-			viz_color(COL_RESET);
-			printf("\n\n");
-
-			viz_gaussian_1d(est_pos, sqrt(est_var), 60, 12);
-
-			printf("\nscaled covariance:\n");
-			{
-				Matrix tmp = mulScalarMatrix(100.0, CEst);
-				printMatrix(tmp);
-				freeMatrix(tmp);
-			}
-
-			/* markers */
-			printf("\n  ");
-			viz_color(COL_CYAN);
-			printf("*");
-			viz_color(COL_RESET);
-			printf(" estimate : %7.3f\n", est_pos);
-			printf("  ");
-			viz_color(COL_YELLOW);
-			printf("o");
-			viz_color(COL_RESET);
-			printf(" measured : %7.3f\n", meas);
-			printf("  ");
-			viz_color(COL_GREEN);
-			printf("x");
-			viz_color(COL_RESET);
-			printf(" truth    : %7.3f\n", true_pos);
-			printf("  error      : %7.3f\n", err);
-			printf("  variance   : %7.3f\n", est_var);
-			printf("  velocity   : %7.3f\n", elem(xEst, 1, 0));
-			printf("  innovation : %7.3f\n", innov);
-
-			if (i == 0 && cfg->interactive) {
-				viz_color(COL_DIM);
-				printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
-				viz_color(COL_RESET);
-			}
+			render_frame_1d(est_pos, est_var, meas, true_pos, err, innov,
+				i, nsteps, elem(xEst, 1, 0), paused, cfg->interactive);
 
 			/* Bug 8: speed variable not used here, hardcoded sleep */
 			usleep(100000);
