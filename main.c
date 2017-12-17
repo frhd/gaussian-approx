@@ -424,6 +424,12 @@ static void render_frame_1d(float est_pos, float est_var, float meas,
 	printf("  velocity   : %7.3f\n", vel);
 	printf("  innovation : %7.3f\n", innov);
 
+	if (step == 0 && interactive) {
+		viz_color(COL_DIM);
+		printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
+		viz_color(COL_RESET);
+	}
+
 	fflush(stdout);
 }
 
