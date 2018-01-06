@@ -596,6 +596,71 @@ done_1d:
 	freeMatrix(y);
 }
 
+/* 2d panel layout — grid on left, state info on right */
+static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
+	float true_x, float true_y, float meas_x, float meas_y,
+	float est_x, float est_y, float vx, float vy,
+	float cov_xx, float cov_yy, float trace_p, float trace_p0,
+	float rmse, float err, float innov_x, float innov_y,
+	int paused) {
+
+	viz_clear_screen();
+
+	/* header line */
+	viz_cursor_move(1, 1);
+	printf("2D Kalman tracking  ");
+	viz_color(COL_BOLD);
+	printf("[step %d/%d]", step + 1, nsteps);
+	viz_color(COL_RESET);
+	printf("  ");
+	if (paused) {
+		viz_color(COL_YELLOW);
+		printf("[PAUSED]");
+	} else {
+		viz_color(COL_GREEN);
+		printf("[RUNNING]");
+	}
+	viz_color(COL_RESET);
+
+	/* grid at row 3 */
+	viz_grid_print_at(g, 3, 1);
+
+	/* legend and extra info below grid */
+	{
+		int brow = 3 + GRID_H + 2;
+
+		viz_cursor_move(brow, 1);
+		printf("  ");
+		viz_color(COL_GREEN);
+		printf(".");
+		viz_color(COL_RESET);
+		printf(" truth    (%7.2f, %7.2f)", true_x, true_y);
+
+		viz_cursor_move(brow + 1, 1);
+		printf("  ");
+		viz_color(COL_YELLOW);
+		printf("o");
+		viz_color(COL_RESET);
+		printf(" measured (%7.2f, %7.2f)", meas_x, meas_y);
+
+		viz_cursor_move(brow + 2, 1);
+		printf("  ");
+		viz_color(COL_CYAN);
+		printf("+");
+		viz_color(COL_RESET);
+		printf(" estimate (%7.2f, %7.2f)", est_x, est_y);
+
+		viz_cursor_move(brow + 3, 1);
+		printf("  ");
+		viz_color(COL_DIM);
+		printf("~");
+		viz_color(COL_RESET);
+		printf(" covariance ellipse");
+	}
+
+	fflush(stdout);
+}
+
 static void run_demo_2d(Config *cfg) {
 	int i;
 	int nsteps = cfg->nsteps;
