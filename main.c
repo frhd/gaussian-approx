@@ -603,6 +603,9 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 	float cov_xx, float cov_yy, float trace_p, float trace_p0,
 	float rmse, float err, float innov_x, float innov_y,
 	int paused) {
+	int wide = viz_term_width() >= 80;
+	Panel sp;
+	char buf[64];
 
 	viz_clear_screen();
 
@@ -624,6 +627,51 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 
 	/* grid at row 3 */
 	viz_grid_print_at(g, 3, 1);
+
+	if (wide) {
+		/* state panel to the right of the grid */
+		sp.row = 3;
+		sp.col = 7 + GRID_W + 2;  /* after y-labels + grid + gap */
+		sp.width = 18;
+		sp.height = 16;
+		viz_panel_border(&sp);
+
+		snprintf(buf, sizeof(buf), "  %s", sim_trajectory_name(cfg->trajectory));
+		viz_panel_text(&sp, 0, buf);
+
+		snprintf(buf, sizeof(buf), " Step %d/%d", step + 1, nsteps);
+		viz_panel_text(&sp, 2, buf);
+
+		snprintf(buf, sizeof(buf), " x:  %7.2f", est_x);
+		viz_panel_text(&sp, 4, buf);
+		snprintf(buf, sizeof(buf), " y:  %7.2f", est_y);
+		viz_panel_text(&sp, 5, buf);
+		snprintf(buf, sizeof(buf), " vx: %7.2f", vx);
+		viz_panel_text(&sp, 6, buf);
+		snprintf(buf, sizeof(buf), " vy: %7.2f", vy);
+		viz_panel_text(&sp, 7, buf);
+
+		viz_cursor_move(sp.row + 1 + 9, sp.col + 1);
+		{
+			float sx = sqrt(cov_xx > 0 ? cov_xx : 0);
+			float sy = sqrt(cov_yy > 0 ? cov_yy : 0);
+			snprintf(buf, sizeof(buf), " \317\203x: %7.2f", sx);
+			viz_panel_text(&sp, 9, buf);
+			snprintf(buf, sizeof(buf), " \317\203y: %7.2f", sy);
+			viz_panel_text(&sp, 10, buf);
+		}
+
+		viz_cursor_move(sp.row + 1 + 12, sp.col + 1);
+		printf(" RMSE: ");
+		if (rmse < 2.0) viz_color(COL_GREEN);
+		else if (rmse < 5.0) viz_color(COL_YELLOW);
+		else viz_color(COL_RED);
+		printf("%5.2f", rmse);
+		viz_color(COL_RESET);
+
+		snprintf(buf, sizeof(buf), " err:  %5.2f", err);
+		viz_panel_text(&sp, 13, buf);
+	}
 
 	/* legend and extra info below grid */
 	{
