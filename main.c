@@ -704,6 +704,40 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 		printf("~");
 		viz_color(COL_RESET);
 		printf(" covariance ellipse");
+
+		if (!wide) {
+			/* fallback: show state info below for narrow terminals */
+			viz_cursor_move(brow + 4, 1);
+			printf("  vel: (%.3f, %.3f)  innov: (%.3f, %.3f)",
+				vx, vy, innov_x, innov_y);
+			viz_cursor_move(brow + 5, 1);
+			printf("  cov diag: %.3f, %.3f  trace(P): %.3f",
+				cov_xx, cov_yy, trace_p);
+			viz_cursor_move(brow + 6, 1);
+			printf("  RMSE: ");
+			if (rmse < 2.0) viz_color(COL_GREEN);
+			else if (rmse < 5.0) viz_color(COL_YELLOW);
+			else viz_color(COL_RED);
+			printf("%.3f", rmse);
+			viz_color(COL_RESET);
+
+			viz_cursor_move(brow + 7, 1);
+			printf("  convergence: ");
+			viz_convergence_bar(trace_p, trace_p0, 20);
+		} else {
+			viz_cursor_move(brow + 4, 1);
+			printf("  innov: (%.3f, %.3f)  convergence: ", innov_x, innov_y);
+			viz_convergence_bar(trace_p, trace_p0, 20);
+		}
+	}
+
+	/* controls help on first frame */
+	if (step == 0 && cfg->interactive) {
+		int hrow = 3 + GRID_H + 8;
+		viz_cursor_move(hrow, 1);
+		viz_color(COL_DIM);
+		printf("  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit");
+		viz_color(COL_RESET);
 	}
 
 	fflush(stdout);
