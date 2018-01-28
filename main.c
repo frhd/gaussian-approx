@@ -372,7 +372,6 @@ static int handle_input(int *paused, int *speed) {
 	return 0;
 }
 
-
 /* 1d layout — curve at top, state info below */
 static void render_frame_1d(float est_pos, float est_var, float meas,
 	float true_pos, float err, float innov, int step, int nsteps,
@@ -847,7 +846,7 @@ static void run_demo_2d(Config *cfg) {
 		if (cfg->interactive)
 			term_raw_mode();
 
-		printf("\033[2J\033[H");
+		viz_clear_screen();
 		printf("2D Kalman tracking demo\n");
 		printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
 		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
@@ -859,7 +858,7 @@ static void run_demo_2d(Config *cfg) {
 		viz_grid_print(&g);
 		printf("\n");
 		viz_color(COL_DIM);
-		printf("  trajectory preview — press enter or wait...\n");
+		printf("  trajectory preview -- press enter or wait...\n");
 		viz_color(COL_RESET);
 		usleep(2000000);
 	}
@@ -947,71 +946,11 @@ static void run_demo_2d(Config *cfg) {
 			/* plot estimate */
 			viz_grid_point(&g, est_x, est_y, '+');
 
-			/* display */
-			printf("\033[2J\033[H");
-			printf("2D Kalman tracking  ");
-			viz_color(COL_BOLD);
-			printf("[step %d/%d]", i + 1, nsteps);
-			viz_color(COL_RESET);
-			printf("  ");
-			if (paused) {
-				viz_color(COL_YELLOW);
-				printf("[PAUSED]");
-			} else {
-				viz_color(COL_GREEN);
-				printf("[RUNNING]");
-			}
-			viz_color(COL_RESET);
-			printf("\n\n");
-			viz_grid_print(&g);
-
-			printf("\n  ");
-			viz_color(COL_GREEN);
-			printf(".");
-			viz_color(COL_RESET);
-			printf(" truth    (%7.2f, %7.2f)\n", true_x, true_y);
-			printf("  ");
-			viz_color(COL_YELLOW);
-			printf("o");
-			viz_color(COL_RESET);
-			printf(" measured (%7.2f, %7.2f)\n", elem(meas, i, 0), elem(meas, i, 1));
-			printf("  ");
-			viz_color(COL_CYAN);
-			printf("+");
-			viz_color(COL_RESET);
-			printf(" estimate (%7.2f, %7.2f)\n", est_x, est_y);
-			printf("  ");
-			viz_color(COL_DIM);
-			printf("~");
-			viz_color(COL_RESET);
-			printf(" covariance ellipse\n");
-			{
-				float rmse = err_sum / (i + 1);
-				printf("  error: %.3f   rmse: ", err);
-				if (rmse < 2.0) viz_color(COL_GREEN);
-				else if (rmse < 5.0) viz_color(COL_YELLOW);
-				else viz_color(COL_RED);
-				printf("%.3f", rmse);
-				viz_color(COL_RESET);
-				printf("\n");
-			}
-
-			/* state vector */
-			printf("  vel: (%.3f, %.3f)  ", elem(xEst, 2, 0), elem(xEst, 3, 0));
-			printf("innov: (%.3f, %.3f)\n", innov_x, innov_y);
-
-			/* covariance and convergence */
-			printf("  cov diag: %.3f, %.3f  trace(P): %.3f\n",
-				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p);
-			printf("  convergence: ");
-			viz_convergence_bar(trace_p, trace_p0, 20);
-			printf("\n");
-
-			if (i == 0 && cfg->interactive) {
-				viz_color(COL_DIM);
-				printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
-				viz_color(COL_RESET);
-			}
+			render_frame_2d(&g, cfg, i, nsteps,
+				true_x, true_y, elem(meas, i, 0), elem(meas, i, 1),
+				est_x, est_y, elem(xEst, 2, 0), elem(xEst, 3, 0),
+				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p, trace_p0,
+				err_sum / (i + 1), err, innov_x, innov_y, paused);
 
 			/* Bug 8: speed variable not used here, hardcoded sleep */
 			usleep(100000);
