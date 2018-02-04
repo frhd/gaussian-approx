@@ -739,6 +739,8 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 		viz_color(COL_RESET);
 	}
 
+	/* move cursor to bottom so output doesn't mess up layout */
+	viz_cursor_move(3 + GRID_H + 8, 1);
 	fflush(stdout);
 }
 
