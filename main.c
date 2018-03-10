@@ -1054,6 +1054,7 @@ int main(int argc, char *argv[]) {
 		} else if (strcmp(argv[i], "--speed") == 0 && i + 1 < argc) {
 			cfg.speed = atoi(argv[i + 1]);
 			if (cfg.speed <= 0) cfg.speed = 100;
+
 			memmove(&argv[i], &argv[i + 2], (argc - i - 2) * sizeof(char *));
 			argc -= 2;
 			i--;
