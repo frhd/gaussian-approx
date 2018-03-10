@@ -567,8 +567,7 @@ static void run_demo(Config *cfg) {
 			render_frame_1d(est_pos, est_var, meas, true_pos, err, innov,
 				i, nsteps, elem(xEst, 1, 0), paused, cfg->interactive);
 
-			/* Bug 8: speed variable not used here, hardcoded sleep */
-			usleep(100000);
+			usleep(speed * 1000);
 		}
 
 		i++;
@@ -954,8 +953,7 @@ static void run_demo_2d(Config *cfg) {
 				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p, trace_p0,
 				err_sum / (i + 1), err, innov_x, innov_y, paused);
 
-			/* Bug 8: speed variable not used here, hardcoded sleep */
-			usleep(100000);
+			usleep(speed * 1000);
 		}
 
 		i++;
