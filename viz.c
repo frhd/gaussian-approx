@@ -393,6 +393,22 @@ void viz_convergence_bar(float trace_p, float trace_p0, int width) {
 	printf("]");
 }
 
+void viz_progress_bar(int step, int total, int width) {
+	int i, filled;
+	if (total <= 0) total = 1;
+	filled = (int)((float)(step + 1) / total * width);
+	if (filled > width) filled = width;
+
+	printf("[");
+	viz_color(COL_CYAN);
+	for (i = 0; i < filled; i++) printf("#");
+	viz_color(COL_RESET);
+	viz_color(COL_DIM);
+	for (i = filled; i < width; i++) printf(".");
+	viz_color(COL_RESET);
+	printf("] %d/%d", step + 1, total);
+}
+
 void viz_cursor_move(int row, int col) {
 	printf("\033[%d;%dH", row, col);
 }

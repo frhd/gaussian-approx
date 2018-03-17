@@ -48,6 +48,7 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch);
 /* color and display helpers */
 void viz_color(const char *code);
 void viz_convergence_bar(float trace_p, float trace_p0, int width);
+void viz_progress_bar(int step, int total, int width);
 
 /* panel layout */
 void viz_cursor_move(int row, int col);
