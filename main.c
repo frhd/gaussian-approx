@@ -423,6 +423,10 @@ static void render_frame_1d(float est_pos, float est_var, float meas,
 	printf("  velocity   : %7.3f\n", vel);
 	printf("  innovation : %7.3f\n", innov);
 
+	printf("  ");
+	viz_progress_bar(step, nsteps, 30);
+	printf("\n");
+
 	if (step == 0 && interactive) {
 		viz_color(COL_DIM);
 		printf("\n  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit\n");
@@ -727,6 +731,13 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 			printf("  innov: (%.3f, %.3f)  convergence: ", innov_x, innov_y);
 			viz_convergence_bar(trace_p, trace_p0, 20);
 		}
+	}
+
+	/* progress bar */
+	{
+		int prow = 3 + GRID_H + 2 + (wide ? 5 : 8);
+		viz_cursor_move(prow, 3);
+		viz_progress_bar(step, nsteps, 30);
 	}
 
 	/* controls help on first frame */
