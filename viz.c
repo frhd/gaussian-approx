@@ -150,6 +150,37 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 	printf("(%d sigma points)\n", npts);
 }
 
+/* color a grid cell based on its character */
+static void viz_grid_putchar(char ch, int r, int c) {
+	if (ch == '.') {
+		viz_color(COL_GREEN);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'o') {
+		viz_color(COL_YELLOW);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == '+' && (r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1)) {
+		viz_color(COL_DIM);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == '+') {
+		viz_color(COL_CYAN);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == '~') {
+		viz_color(COL_DIM);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == '|' || ch == '-') {
+		viz_color(COL_DIM);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else {
+		putchar(ch);
+	}
+}
+
 void viz_grid_init(Grid *g, float xmin, float xmax, float ymin, float ymax) {
 	int r, c;
 
@@ -191,33 +222,7 @@ void viz_grid_print(Grid *g) {
 		}
 		for (c = 0; c < GRID_W; c++) {
 			char ch = g->cells[r][c];
-			if (ch == '.') {
-				viz_color(COL_GREEN);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else if (ch == 'o') {
-				viz_color(COL_YELLOW);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else if (ch == '+' && (r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1)) {
-				viz_color(COL_DIM);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else if (ch == '+') {
-				viz_color(COL_CYAN);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else if (ch == '~') {
-				viz_color(COL_DIM);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else if (ch == '|' || ch == '-') {
-				viz_color(COL_DIM);
-				putchar(ch);
-				viz_color(COL_RESET);
-			} else {
-				putchar(ch);
-			}
+			viz_grid_putchar(ch, r, c);
 		}
 		putchar('\n');
 	}
