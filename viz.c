@@ -164,6 +164,11 @@ static void viz_grid_putchar(char ch, int r, int c) {
 		viz_color(COL_YELLOW);
 		putchar(ch);
 		viz_color(COL_RESET);
+	} else if (ch == 'O') {
+		viz_color(COL_BOLD);
+		viz_color(COL_YELLOW);
+		putchar('o');
+		viz_color(COL_RESET);
 	} else if (ch == '+' && (r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1)) {
 		viz_color(COL_DIM);
 		putchar(ch);

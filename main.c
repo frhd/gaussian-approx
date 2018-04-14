@@ -950,11 +950,13 @@ static void run_demo_2d(Config *cfg) {
 				}
 			}
 
-			/* plot measurements up to this step */
+			/* plot measurements — current one highlighted */
 			{
 				int k;
-				for (k = 0; k <= i; k++)
+				for (k = 0; k < i; k++)
 					viz_grid_point(&g, elem(meas, k, 0), elem(meas, k, 1), 'o');
+				/* current measurement: bright marker */
+				viz_grid_point(&g, elem(meas, i, 0), elem(meas, i, 1), 'O');
 			}
 
 			/* plot estimate */
