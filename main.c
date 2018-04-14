@@ -941,11 +941,13 @@ static void run_demo_2d(Config *cfg) {
 			/* draw covariance ellipse first (so markers draw on top) */
 			viz_grid_ellipse(&g, est_x, est_y, CEst, '~');
 
-			/* plot true trajectory up to this step */
+			/* plot true trajectory with trail effect */
 			{
-				int k;
-				for (k = 0; k <= i; k++)
-					viz_grid_point(&g, elem(true_pos, k, 0), elem(true_pos, k, 1), '.');
+				int k, trail = 10;
+				for (k = 0; k <= i; k++) {
+					char ch = (i - k > trail) ? ',' : '.';
+					viz_grid_point(&g, elem(true_pos, k, 0), elem(true_pos, k, 1), ch);
+				}
 			}
 
 			/* plot measurements up to this step */
