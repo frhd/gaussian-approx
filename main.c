@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "matrix.h"
 #include "eig.h"
 #include "gaussianApprox.h"
@@ -375,7 +376,7 @@ static int handle_input(int *paused, int *speed) {
 /* 1d layout — curve at top, state info below */
 static void render_frame_1d(float est_pos, float est_var, float meas,
 	float true_pos, float err, float innov, int step, int nsteps,
-	float vel, int paused, int interactive) {
+	float vel, int paused, int interactive, float elapsed) {
 
 	viz_clear_screen();
 
@@ -393,6 +394,9 @@ static void render_frame_1d(float est_pos, float est_var, float meas,
 		viz_color(COL_GREEN);
 		printf("[RUNNING]");
 	}
+	viz_color(COL_RESET);
+	viz_color(COL_DIM);
+	printf("  %.1fs", elapsed);
 	viz_color(COL_RESET);
 
 	/* gaussian curve — printed sequentially (uses printf directly) */
@@ -446,6 +450,7 @@ static void run_demo(Config *cfg) {
 	float err_sum = 0;
 	int paused, speed;
 	float innov = 0;
+	struct timeval t_start, t_now;
 
 	if (nsteps <= 0) {
 		printf("nothing to do (nsteps=0)\n");
@@ -516,8 +521,10 @@ static void run_demo(Config *cfg) {
 		usleep(1000000);
 	}
 
+	gettimeofday(&t_start, NULL);
+
 	for (i = 0; i < nsteps; ) {
-		float est_pos, est_var, err;
+		float est_pos, est_var, err, elapsed;
 		int ret;
 
 		if (!cfg->quiet && cfg->interactive) {
@@ -568,8 +575,11 @@ static void run_demo(Config *cfg) {
 		}
 
 		if (!cfg->quiet) {
+			gettimeofday(&t_now, NULL);
+			elapsed = (t_now.tv_sec - t_start.tv_sec) +
+				(t_now.tv_usec - t_start.tv_usec) / 1e6;
 			render_frame_1d(est_pos, est_var, meas, true_pos, err, innov,
-				i, nsteps, elem(xEst, 1, 0), paused, cfg->interactive);
+				i, nsteps, elem(xEst, 1, 0), paused, cfg->interactive, elapsed);
 
 			usleep(speed * 1000);
 		}
@@ -604,7 +614,7 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 	float est_x, float est_y, float vx, float vy,
 	float cov_xx, float cov_yy, float trace_p, float trace_p0,
 	float rmse, float err, float innov_x, float innov_y,
-	int paused) {
+	int paused, float elapsed) {
 	int wide = viz_term_width() >= 80;
 	Panel sp;
 	char buf[64];
@@ -625,6 +635,9 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 		viz_color(COL_GREEN);
 		printf("[RUNNING]");
 	}
+	viz_color(COL_RESET);
+	viz_color(COL_DIM);
+	printf("  %.1fs", elapsed);
 	viz_color(COL_RESET);
 
 	/* grid at row 3 */
@@ -769,6 +782,7 @@ static void run_demo_2d(Config *cfg) {
 	float trace_p0;
 	int paused, speed;
 	float innov_x = 0, innov_y = 0;
+	struct timeval t_start, t_now;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -875,9 +889,11 @@ static void run_demo_2d(Config *cfg) {
 		usleep(2000000);
 	}
 
+	gettimeofday(&t_start, NULL);
+
 	/* main filter loop — no temp matrix allocs inside, checked Aug 2017 */
 	for (i = 0; i < nsteps; ) {
-		float est_x, est_y, true_x, true_y, err;
+		float est_x, est_y, true_x, true_y, err, elapsed;
 		float trace_p;
 		int ret;
 
@@ -962,12 +978,16 @@ static void run_demo_2d(Config *cfg) {
 			/* plot estimate */
 			viz_grid_point(&g, est_x, est_y, '+');
 
+			gettimeofday(&t_now, NULL);
+			elapsed = (t_now.tv_sec - t_start.tv_sec) +
+				(t_now.tv_usec - t_start.tv_usec) / 1e6;
 			render_frame_2d(&g, cfg, i, nsteps,
 				true_x, true_y, elem(meas, i, 0), elem(meas, i, 1),
 				est_x, est_y, elem(xEst, 2, 0), elem(xEst, 3, 0),
 				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p, trace_p0,
-				err_sum / (i + 1), err, innov_x, innov_y, paused);
+				err_sum / (i + 1), err, innov_x, innov_y, paused, elapsed);
 
+			/* brief pause after measurement update for visual emphasis */
 			usleep(speed * 1000);
 		}
 
