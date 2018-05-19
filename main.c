@@ -31,6 +31,7 @@ typedef struct {
 	int trajectory;
 	int interactive;
 	int speed;
+	int loop;
 	char *outfile;
 } Config;
 
@@ -47,6 +48,7 @@ static void print_usage(const char *prog) {
 	printf("  -i          interactive mode (step with keyboard)\n");
 	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
 	printf("  --no-color  disable ANSI colors\n");
+	printf("  --loop      auto-restart with new seed when done\n");
 	printf("  -h          show this help\n");
 }
 
@@ -1077,6 +1079,7 @@ int main(int argc, char *argv[]) {
 	cfg.trajectory = SIM_CIRCLE;
 	cfg.interactive = 0;
 	cfg.speed = 100;
+	cfg.loop = 0;
 	cfg.outfile = NULL;
 
 	/* check for gnu-style long options before getopt */
