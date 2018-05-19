@@ -1096,6 +1096,11 @@ int main(int argc, char *argv[]) {
 			memmove(&argv[i], &argv[i + 2], (argc - i - 2) * sizeof(char *));
 			argc -= 2;
 			i--;
+		} else if (strcmp(argv[i], "--loop") == 0) {
+			cfg.loop = 1;
+			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
+			argc--;
+			i--;
 		}
 	}
 
@@ -1174,13 +1179,14 @@ int main(int argc, char *argv[]) {
 	/* print config summary */
 	if (!cfg.quiet) {
 		const char *mnames[] = {"2d", "1d", "test", "grid"};
-		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s\n",
+		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s%s\n",
 			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
 			cfg.nsteps, cfg.dt, cfg.L,
 			cfg.seed >= 0 ? "fixed" : "time",
 			viz_color_enabled ? "on" : "off",
 			cfg.interactive ? " interactive" : "",
 			cfg.speed,
+			cfg.loop ? " loop" : "",
 			cfg.outfile ? " export=" : "",
 			cfg.outfile ? cfg.outfile : "");
 	}
