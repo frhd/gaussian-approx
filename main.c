@@ -778,8 +778,9 @@ static void run_demo_2d(Config *cfg) {
 	int nsteps = cfg->nsteps;
 	float dt = cfg->dt;
 	int L = cfg->L;
-	float err_sum = 0;
+	float err_sum = 0, err_max = 0;
 	float xmin, xmax, ymin, ymax, margin;
+	int traj_type = cfg->trajectory;
 
 	if (nsteps <= 0) {
 		printf("nothing to do (nsteps=0)\n");
@@ -789,6 +790,7 @@ static void run_demo_2d(Config *cfg) {
 	int paused, speed;
 	float innov_x = 0, innov_y = 0;
 	struct timeval t_start, t_now;
+	int action;  /* 0=normal end, -1=quit, -2=restart, -3=next */
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -796,11 +798,49 @@ static void run_demo_2d(Config *cfg) {
 	Grid g;
 	FILE *expf = NULL;
 
+	/* process noise — constant across restarts */
+	Cw = zeroMatrix(6, 6);
+	setElem(Cw, 0, 0, 0.01);
+	setElem(Cw, 1, 1, 0.01);
+	setElem(Cw, 2, 2, 0.1);
+	setElem(Cw, 3, 3, 0.1);
+	setElem(Cw, 4, 4, 0.001);
+	setElem(Cw, 5, 5, 0.001);
+
+	/* measurement noise */
+	Cv = zeroMatrix(2, 2);
+	setElem(Cv, 0, 0, 4.0);
+	setElem(Cv, 1, 1, 4.0);
+
+	m_opt = gaussianApprox(L);
+	y = newMatrix(2, 1);
+
+	/* open export file if requested */
+	if (cfg->outfile) {
+		expf = export_open(cfg->outfile);
+		if (expf) {
+			export_header_2d(expf);
+			printf("Exporting to: %s\n", cfg->outfile);
+		}
+	}
+
+	speed = cfg->speed;
+
+	if (!cfg->quiet && cfg->interactive)
+		term_raw_mode();
+
+restart_2d:
+	action = 0;
+	err_sum = 0;
+	err_max = 0;
+	innov_x = 0;
+	innov_y = 0;
+
 	/* generate scenario */
-	scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
+	scen = sim_create_scenario(traj_type, nsteps, dt, 2.0);
 	if (!scen) {
 		fprintf(stderr, "failed to create scenario\n");
-		return;
+		goto cleanup_2d;
 	}
 	true_pos = scen->true_pos;
 	meas = scen->measurements;
@@ -842,45 +882,15 @@ static void run_demo_2d(Config *cfg) {
 	setElem(CEst, 4, 4, 0.001);
 	setElem(CEst, 5, 5, 0.001);
 
-	/* process noise */
-	Cw = zeroMatrix(6, 6);
-	setElem(Cw, 0, 0, 0.01);
-	setElem(Cw, 1, 1, 0.01);
-	setElem(Cw, 2, 2, 0.1);
-	setElem(Cw, 3, 3, 0.1);
-	setElem(Cw, 4, 4, 0.001);
-	setElem(Cw, 5, 5, 0.001);
-
-	/* measurement noise */
-	Cv = zeroMatrix(2, 2);
-	setElem(Cv, 0, 0, 4.0);
-	setElem(Cv, 1, 1, 4.0);
-
-	m_opt = gaussianApprox(L);
-	y = newMatrix(2, 1);
-
 	/* initial trace for convergence indicator */
 	trace_p0 = elem(CEst, 0, 0) + elem(CEst, 1, 1);
 
-	/* open export file if requested */
-	if (cfg->outfile) {
-		expf = export_open(cfg->outfile);
-		if (expf) {
-			export_header_2d(expf);
-			printf("Exporting to: %s\n", cfg->outfile);
-		}
-	}
-
 	paused = cfg->interactive;
-	speed = cfg->speed;
 
 	if (!cfg->quiet) {
-		if (cfg->interactive)
-			term_raw_mode();
-
 		viz_clear_screen();
 		printf("2D Kalman tracking demo\n");
-		printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
+		printf("trajectory: %s\n", sim_trajectory_name(traj_type));
 		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
 
 		/* show trajectory preview */
@@ -897,7 +907,7 @@ static void run_demo_2d(Config *cfg) {
 
 	gettimeofday(&t_start, NULL);
 
-	/* main filter loop — no temp matrix allocs inside, checked Aug 2017 */
+	/* main filter loop */
 	for (i = 0; i < nsteps; ) {
 		float est_x, est_y, true_x, true_y, err, elapsed;
 		float trace_p;
@@ -906,13 +916,17 @@ static void run_demo_2d(Config *cfg) {
 		if (!cfg->quiet && cfg->interactive) {
 			while (paused) {
 				ret = handle_input(&paused, &speed);
-				if (ret == -1) goto done_2d;
+				if (ret == -1) { action = -1; goto end_loop_2d; }
+				if (ret == -2) { action = -2; goto end_loop_2d; }
+				if (ret == -3) { action = -3; goto end_loop_2d; }
 				if (ret == 1) break;
 				usleep(20000);
 			}
 			if (!paused) {
 				ret = handle_input(&paused, &speed);
-				if (ret == -1) goto done_2d;
+				if (ret == -1) { action = -1; goto end_loop_2d; }
+				if (ret == -2) { action = -2; goto end_loop_2d; }
+				if (ret == -3) { action = -3; goto end_loop_2d; }
 			}
 		}
 
@@ -942,6 +956,7 @@ static void run_demo_2d(Config *cfg) {
 		err = sqrt((est_x - true_x) * (est_x - true_x) +
 		           (est_y - true_y) * (est_y - true_y));
 		err_sum += err;
+		if (err > err_max) err_max = err;
 
 		trace_p = elem(CEst, 0, 0) + elem(CEst, 1, 1);
 
@@ -1000,26 +1015,40 @@ static void run_demo_2d(Config *cfg) {
 		i++;
 	}
 
-done_2d:
+end_loop_2d:
+	/* free per-run state */
+	freeMatrix(xEst);
+	freeMatrix(CEst);
+	sim_free_scenario(scen);
+
+	/* handle restart / next trajectory */
+	if (action == -2) {
+		srand(time(NULL));
+		goto restart_2d;
+	}
+	if (action == -3) {
+		traj_type = (traj_type + 1) % 4;
+		srand(time(NULL));
+		goto restart_2d;
+	}
+
 	if (!cfg->quiet && cfg->interactive)
 		term_restore();
 
-	printf("\n--- summary ---\n");
-	printf("mean rmse: %.3f\n", err_sum / (i > 0 ? i : 1));
-	printf("final estimate: (%.3f, %.3f)\n", elem(xEst, 0, 0), elem(xEst, 1, 0));
-	printf("final truth:    (%.3f, %.3f)\n",
-		elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+	if (action != 0) {
+		/* early quit — print short summary */
+		printf("\n--- summary ---\n");
+		printf("stopped at step %d/%d\n", i, nsteps);
+	}
 
 	if (expf)
 		export_close(expf);
 
-	freeMatrix(xEst);
-	freeMatrix(CEst);
+cleanup_2d:
 	freeMatrix(Cw);
 	freeMatrix(Cv);
 	freeMatrix(m_opt);
 	freeMatrix(y);
-	sim_free_scenario(scen);
 }
 
 static void run_grid_demo(void) {
