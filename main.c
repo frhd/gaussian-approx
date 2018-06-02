@@ -348,7 +348,8 @@ static void run_tests(void) {
 	printf("\nall tests done\n");
 }
 
-/* process keyboard input, return 1 if should advance step, -1 if quit */
+/* process keyboard input
+ * returns: 1=advance step, 0=nothing, -1=quit, -2=restart, -3=next traj */
 static int handle_input(int *paused, int *speed) {
 	while (term_kbhit()) {
 		int ch = term_getchar();
@@ -358,10 +359,13 @@ static int handle_input(int *paused, int *speed) {
 			return 1;
 		}
 		if (ch == 'r' || ch == 'R') {
-			*paused = 0;
+			return -2;
 		}
 		if (ch == 'p' || ch == 'P') {
 			*paused = 1;
+		}
+		if (ch == 'n' || ch == 'N') {
+			return -3;
 		}
 		if (ch == '+' || ch == '=') {
 			*speed -= 20;
