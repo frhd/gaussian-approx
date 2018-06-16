@@ -1016,6 +1016,32 @@ restart_2d:
 	}
 
 end_loop_2d:
+	/* show visual end-of-demo summary */
+	if (!cfg->quiet && action == 0) {
+		float final_rmse = err_sum / (i > 0 ? i : 1);
+		float final_trace = elem(CEst, 0, 0) + elem(CEst, 1, 1);
+
+		viz_clear_screen();
+		viz_cursor_move(1, 1);
+		viz_color(COL_BOLD);
+		printf("  demo complete — %s\n\n", sim_trajectory_name(traj_type));
+		viz_color(COL_RESET);
+		printf("  steps:          %d\n", i);
+		printf("  final RMSE:     ");
+		if (final_rmse < 2.0) viz_color(COL_GREEN);
+		else if (final_rmse < 5.0) viz_color(COL_YELLOW);
+		else viz_color(COL_RED);
+		printf("%.3f\n", final_rmse);
+		viz_color(COL_RESET);
+		printf("  avg RMSE:       %.3f\n", final_rmse);
+		printf("  max error:      %.3f\n", err_max);
+		printf("  final trace(P): %.3f\n", final_trace);
+		printf("  final estimate: (%.2f, %.2f)\n",
+			elem(xEst, 0, 0), elem(xEst, 1, 0));
+		printf("  final truth:    (%.2f, %.2f)\n",
+			elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+	}
+
 	/* free per-run state */
 	freeMatrix(xEst);
 	freeMatrix(CEst);
