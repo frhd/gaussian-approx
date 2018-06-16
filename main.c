@@ -1040,6 +1040,31 @@ end_loop_2d:
 			elem(xEst, 0, 0), elem(xEst, 1, 0));
 		printf("  final truth:    (%.2f, %.2f)\n",
 			elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+
+		if (cfg->interactive || cfg->loop) {
+			printf("\n");
+			viz_color(COL_DIM);
+			printf("  [r] restart  [n] next trajectory  [q] quit\n");
+			viz_color(COL_RESET);
+
+			if (cfg->loop) {
+				/* auto-restart after a short pause */
+				usleep(1000000);
+				action = -2;
+			} else {
+				/* wait for user input */
+				while (1) {
+					if (term_kbhit()) {
+						int ch = term_getchar();
+						if (ch == 'q' || ch == 'Q') { action = -1; break; }
+						if (ch == 'r' || ch == 'R') { action = -2; break; }
+						if (ch == 'n' || ch == 'N') { action = -3; break; }
+						if (ch == ' ' || ch == '\n') { action = -1; break; }
+					}
+					usleep(20000);
+				}
+			}
+		}
 	}
 
 	/* free per-run state */
