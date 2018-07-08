@@ -1016,6 +1016,17 @@ restart_2d:
 	}
 
 end_loop_2d:
+	/* quiet mode: print text summary */
+	if (cfg->quiet && action == 0) {
+		printf("--- summary ---\n");
+		printf("mean rmse: %.3f\n", err_sum / (i > 0 ? i : 1));
+		printf("max error: %.3f\n", err_max);
+		printf("final estimate: (%.3f, %.3f)\n",
+			elem(xEst, 0, 0), elem(xEst, 1, 0));
+		printf("final truth:    (%.3f, %.3f)\n",
+			elem(true_pos, nsteps - 1, 0), elem(true_pos, nsteps - 1, 1));
+	}
+
 	/* show visual end-of-demo summary */
 	if (!cfg->quiet && action == 0) {
 		float final_rmse = err_sum / (i > 0 ? i : 1);
