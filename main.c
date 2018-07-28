@@ -761,15 +761,15 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 
 	/* controls help on first frame */
 	if (step == 0 && cfg->interactive) {
-		int hrow = 3 + GRID_H + 8;
+		int hrow = 3 + GRID_H + (wide ? 8 : 11);
 		viz_cursor_move(hrow, 1);
 		viz_color(COL_DIM);
-		printf("  [space] step  [r]un  [p]ause  [+/-] speed  [q]uit");
+		printf("  [space] step  [p]ause  [r]estart  [n]ext  [+/-] speed  [q]uit");
 		viz_color(COL_RESET);
 	}
 
 	/* move cursor to bottom so output doesn't mess up layout */
-	viz_cursor_move(3 + GRID_H + 9, 1);
+	viz_cursor_move(3 + GRID_H + (wide ? 10 : 13), 1);
 	fflush(stdout);
 }
 
