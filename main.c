@@ -537,14 +537,14 @@ static void run_demo(Config *cfg) {
 			/* wait for input in interactive mode */
 			while (paused) {
 				ret = handle_input(&paused, &speed);
-				if (ret == -1) goto done_1d;
+				if (ret < 0) goto done_1d;
 				if (ret == 1) break;
 				usleep(20000);
 			}
 			/* also check for input in run mode */
 			if (!paused) {
 				ret = handle_input(&paused, &speed);
-				if (ret == -1) goto done_1d;
+				if (ret < 0) goto done_1d;
 			}
 		}
 
@@ -1187,7 +1187,6 @@ int main(int argc, char *argv[]) {
 		} else if (strcmp(argv[i], "--speed") == 0 && i + 1 < argc) {
 			cfg.speed = atoi(argv[i + 1]);
 			if (cfg.speed <= 0) cfg.speed = 100;
-
 			memmove(&argv[i], &argv[i + 2], (argc - i - 2) * sizeof(char *));
 			argc -= 2;
 			i--;
