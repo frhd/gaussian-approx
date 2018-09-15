@@ -33,4 +33,15 @@ void sim_free_scenario(Scenario *s);
 /* trajectory type name */
 const char *sim_trajectory_name(int type);
 
+/* multi-target support */
+#define MAX_TARGETS 4
+
+typedef struct {
+	Matrix xEst;     /* state estimate */
+	Matrix CEst;     /* covariance */
+	Scenario *scen;  /* individual scenario */
+	char marker;     /* display character: A, B, C, D */
+	int active;      /* whether target is being tracked */
+} Target;
+
 #endif
