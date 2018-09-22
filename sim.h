@@ -44,4 +44,7 @@ typedef struct {
 	int active;      /* whether target is being tracked */
 } Target;
 
+/* create multi-target scenarios with offset starting positions */
+void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, float noise);
+
 #endif
