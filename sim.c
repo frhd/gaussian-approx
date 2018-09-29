@@ -166,3 +166,18 @@ Matrix sim_measurements(Matrix true_pos, float noise_std) {
 	}
 	return meas;
 }
+
+void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, float noise) {
+	int k;
+	int types[] = {SIM_CIRCLE, SIM_LINE, SIM_FIGURE8, SIM_RANDOM};
+	char markers[] = {'A', 'B', 'C', 'D'};
+
+	for (k = 0; k < ntargets && k < MAX_TARGETS; k++) {
+		int ttype = types[k % 4];
+		targets[k].scen = sim_create_scenario(ttype, nsteps, dt, noise);
+		targets[k].marker = markers[k];
+		targets[k].active = 1;
+		targets[k].xEst = NULL;
+		targets[k].CEst = NULL;
+	}
+}
