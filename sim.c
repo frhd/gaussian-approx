@@ -169,8 +169,11 @@ Matrix sim_measurements(Matrix true_pos, float noise_std) {
 
 void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, float noise) {
 	int k;
+	/* trajectory types to assign: cycle through available types */
 	int types[] = {SIM_CIRCLE, SIM_LINE, SIM_FIGURE8, SIM_RANDOM};
 	char markers[] = {'A', 'B', 'C', 'D'};
+	/* position offsets so targets don't overlap */
+	float offsets[][2] = {{0, 0}, {8, 4}, {-6, 6}, {4, -8}};
 
 	for (k = 0; k < ntargets && k < MAX_TARGETS; k++) {
 		int ttype = types[k % 4];
@@ -179,5 +182,18 @@ void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, flo
 		targets[k].active = 1;
 		targets[k].xEst = NULL;
 		targets[k].CEst = NULL;
+
+		/* apply position offset to separate targets */
+		if (targets[k].scen && k > 0) {
+			int i;
+			Matrix pos = targets[k].scen->true_pos;
+			Matrix meas = targets[k].scen->measurements;
+			for (i = 0; i < nsteps; i++) {
+				setElem(pos, i, 0, elem(pos, i, 0) + offsets[k][0]);
+				setElem(pos, i, 1, elem(pos, i, 1) + offsets[k][1]);
+				setElem(meas, i, 0, elem(meas, i, 0) + offsets[k][0]);
+				setElem(meas, i, 1, elem(meas, i, 1) + offsets[k][1]);
+			}
+		}
 	}
 }
