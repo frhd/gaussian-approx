@@ -47,4 +47,10 @@ typedef struct {
 /* create multi-target scenarios with offset starting positions */
 void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, float noise);
 
+/* free all target state (scenarios only — filter state freed separately) */
+void sim_free_targets(Target *targets, int ntargets);
+
+/* check if measurement is dropped this step (10% dropout rate) */
+int sim_measurement_dropout(void);
+
 #endif

@@ -167,6 +167,10 @@ Matrix sim_measurements(Matrix true_pos, float noise_std) {
 	return meas;
 }
 
+int sim_measurement_dropout(void) {
+	return ((float)rand() / RAND_MAX) < 0.1;
+}
+
 void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, float noise) {
 	int k;
 	/* trajectory types to assign: cycle through available types */
@@ -195,5 +199,17 @@ void sim_multi_scenario(Target *targets, int ntargets, int nsteps, float dt, flo
 				setElem(meas, i, 1, elem(meas, i, 1) + offsets[k][1]);
 			}
 		}
+	}
+}
+
+void sim_free_targets(Target *targets, int ntargets) {
+	int k;
+	for (k = 0; k < ntargets; k++) {
+		if (targets[k].scen)
+			sim_free_scenario(targets[k].scen);
+		if (targets[k].xEst)
+			freeMatrix(targets[k].xEst);
+		if (targets[k].CEst)
+			freeMatrix(targets[k].CEst);
 	}
 }
