@@ -185,6 +185,30 @@ static void viz_grid_putchar(char ch, int r, int c) {
 		viz_color(COL_DIM);
 		putchar(ch);
 		viz_color(COL_RESET);
+	} else if (ch == 'A' || ch == 'a') {
+		viz_color(ch == 'A' ? COL_BOLD : "");
+		viz_color(COL_GREEN);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'B' || ch == 'b') {
+		viz_color(ch == 'B' ? COL_BOLD : "");
+		viz_color(COL_YELLOW);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'C' || ch == 'c') {
+		viz_color(ch == 'C' ? COL_BOLD : "");
+		viz_color(COL_CYAN);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'D' || ch == 'd') {
+		viz_color(ch == 'D' ? COL_BOLD : "");
+		viz_color(COL_RED);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == '?') {
+		viz_color(COL_DIM);
+		putchar(ch);
+		viz_color(COL_RESET);
 	} else {
 		putchar(ch);
 	}
