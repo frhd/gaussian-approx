@@ -15,10 +15,11 @@
 #include "sim.h"
 #include "export.h"
 
-#define MODE_2D   0
-#define MODE_1D   1
-#define MODE_TEST 2
-#define MODE_GRID 3
+#define MODE_2D    0
+#define MODE_1D    1
+#define MODE_TEST  2
+#define MODE_GRID  3
+#define MODE_MULTI 4
 
 typedef struct {
 	int mode;
@@ -33,6 +34,7 @@ typedef struct {
 	int speed;
 	int loop;
 	char *outfile;
+	int ntargets;
 } Config;
 
 static void print_usage(const char *prog) {
@@ -1154,6 +1156,7 @@ static void run_grid_demo(void) {
 static int parse_mode(const char *s) {
 	if (strcmp(s, "2d") == 0) return MODE_2D;
 	if (strcmp(s, "1d") == 0) return MODE_1D;
+	if (strcmp(s, "multi") == 0) return MODE_MULTI;
 	if (strcmp(s, "test") == 0) return MODE_TEST;
 	if (strcmp(s, "grid") == 0) return MODE_GRID;
 	return -1;
