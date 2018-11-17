@@ -39,12 +39,13 @@ typedef struct {
 
 static void print_usage(const char *prog) {
 	printf("usage: %s [options]\n", prog);
-	printf("  -m <mode>   demo mode: 2d, 1d, test, grid  (default: 2d)\n");
+	printf("  -m <mode>   demo mode: 2d, 1d, multi, test, grid (default: 2d)\n");
 	printf("  -t <traj>   trajectory: circle, line, fig8, random (default: circle)\n");
 	printf("  -n <steps>  number of steps                 (default: 100)\n");
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
 	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
+	printf("  -k <num>    number of targets (1-4)         (default: 2)\n");
 	printf("  -o <file>   export data to CSV file\n");
 	printf("  -q          quiet mode (final result only)\n");
 	printf("  -i          interactive mode (step with keyboard)\n");
@@ -1179,6 +1180,7 @@ int main(int argc, char *argv[]) {
 	cfg.speed = 100;
 	cfg.loop = 0;
 	cfg.outfile = NULL;
+	cfg.ntargets = 2;
 
 	/* check for gnu-style long options before getopt */
 	for (i = 1; i < argc; i++) {
@@ -1201,7 +1203,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:o:qih")) != -1) {
+	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:o:k:qih")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -1239,6 +1241,13 @@ int main(int argc, char *argv[]) {
 		case 's':
 			cfg.seed = atoi(optarg);
 			break;
+		case 'k':
+			cfg.ntargets = atoi(optarg);
+			if (cfg.ntargets < 1 || cfg.ntargets > MAX_TARGETS) {
+				fprintf(stderr, "targets must be 1-%d\n", MAX_TARGETS);
+				return 1;
+			}
+			break;
 		case 'o':
 			cfg.outfile = optarg;
 			break;
@@ -1275,8 +1284,8 @@ int main(int argc, char *argv[]) {
 
 	/* print config summary */
 	if (!cfg.quiet) {
-		const char *mnames[] = {"2d", "1d", "test", "grid"};
-		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s%s\n",
+		const char *mnames[] = {"2d", "1d", "test", "grid", "multi"};
+		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s%s",
 			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
 			cfg.nsteps, cfg.dt, cfg.L,
 			cfg.seed >= 0 ? "fixed" : "time",
@@ -1286,6 +1295,9 @@ int main(int argc, char *argv[]) {
 			cfg.loop ? " loop" : "",
 			cfg.outfile ? " export=" : "",
 			cfg.outfile ? cfg.outfile : "");
+		if (cfg.mode == MODE_MULTI)
+			printf(" targets=%d", cfg.ntargets);
+		printf("\n");
 	}
 
 	switch (cfg.mode) {
