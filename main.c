@@ -1116,6 +1116,11 @@ cleanup_2d:
 	freeMatrix(y);
 }
 
+static void run_demo_multi(Config *cfg) {
+	int ntargets = cfg->ntargets;
+	printf("multi-target mode: %d targets (not yet implemented)\n", ntargets);
+}
+
 static void run_grid_demo(void) {
 	int k, npts = 50;
 	Grid g;
@@ -1309,6 +1314,9 @@ int main(int argc, char *argv[]) {
 		break;
 	case MODE_1D:
 		run_demo(&cfg);
+		break;
+	case MODE_MULTI:
+		run_demo_multi(&cfg);
 		break;
 	case MODE_2D:
 	default:
