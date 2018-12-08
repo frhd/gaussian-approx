@@ -1117,8 +1117,97 @@ cleanup_2d:
 }
 
 static void run_demo_multi(Config *cfg) {
+	int i, k;
+	int nsteps = cfg->nsteps;
+	float dt = cfg->dt;
+	int L = cfg->L;
 	int ntargets = cfg->ntargets;
-	printf("multi-target mode: %d targets (not yet implemented)\n", ntargets);
+	float xmin, xmax, ymin, ymax, margin;
+
+	Target targets[MAX_TARGETS];
+	Matrix Cw, Cv, m_opt, y;
+	Grid g;
+
+	if (nsteps <= 0) {
+		printf("nothing to do (nsteps=0)\n");
+		return;
+	}
+	if (ntargets < 1) ntargets = 1;
+	if (ntargets > MAX_TARGETS) ntargets = MAX_TARGETS;
+
+	Cw = zeroMatrix(6, 6);
+	setElem(Cw, 0, 0, 0.01);
+	setElem(Cw, 1, 1, 0.01);
+	setElem(Cw, 2, 2, 0.1);
+	setElem(Cw, 3, 3, 0.1);
+	setElem(Cw, 4, 4, 0.001);
+	setElem(Cw, 5, 5, 0.001);
+
+	Cv = zeroMatrix(2, 2);
+	setElem(Cv, 0, 0, 4.0);
+	setElem(Cv, 1, 1, 4.0);
+
+	m_opt = gaussianApprox(L);
+	y = newMatrix(2, 1);
+
+	sim_multi_scenario(targets, ntargets, nsteps, dt, 2.0);
+
+	for (k = 0; k < ntargets; k++) {
+		if (!targets[k].scen) continue;
+		targets[k].xEst = zeroMatrix(6, 1);
+		setElem(targets[k].xEst, 0, 0, elem(targets[k].scen->true_pos, 0, 0));
+		setElem(targets[k].xEst, 1, 0, elem(targets[k].scen->true_pos, 0, 1));
+
+		targets[k].CEst = zeroMatrix(6, 6);
+		setElem(targets[k].CEst, 0, 0, 10.0);
+		setElem(targets[k].CEst, 1, 1, 10.0);
+		setElem(targets[k].CEst, 2, 2, 5.0);
+		setElem(targets[k].CEst, 3, 3, 5.0);
+		setElem(targets[k].CEst, 4, 4, 0.001);
+		setElem(targets[k].CEst, 5, 5, 0.001);
+	}
+
+	/* auto-scale grid */
+	xmin = xmax = elem(targets[0].scen->true_pos, 0, 0);
+	ymin = ymax = elem(targets[0].scen->true_pos, 0, 1);
+	for (k = 0; k < ntargets; k++) {
+		Matrix pos = targets[k].scen->true_pos;
+		for (i = 0; i < nsteps; i++) {
+			float tx = elem(pos, i, 0);
+			float ty = elem(pos, i, 1);
+			if (tx < xmin) xmin = tx;
+			if (tx > xmax) xmax = tx;
+			if (ty < ymin) ymin = ty;
+			if (ty > ymax) ymax = ty;
+		}
+	}
+	{
+		float span = xmax - xmin;
+		float yspan = ymax - ymin;
+		if (yspan > span) span = yspan;
+		margin = span * 0.25;
+	}
+	if (margin < 1.0) margin = 1.0;
+	xmin -= margin; xmax += margin;
+	ymin -= margin; ymax += margin;
+
+	printf("multi-target setup: %d targets, grid [%.1f,%.1f] x [%.1f,%.1f]\n",
+		ntargets, xmin, xmax, ymin, ymax);
+
+	/* preview */
+	viz_grid_init(&g, xmin, xmax, ymin, ymax);
+	for (k = 0; k < ntargets; k++) {
+		Matrix pos = targets[k].scen->true_pos;
+		for (i = 0; i < nsteps; i++)
+			viz_grid_point(&g, elem(pos, i, 0), elem(pos, i, 1), targets[k].marker + 32);
+	}
+	viz_grid_print(&g);
+
+	sim_free_targets(targets, ntargets);
+	freeMatrix(Cw);
+	freeMatrix(Cv);
+	freeMatrix(m_opt);
+	freeMatrix(y);
 }
 
 static void run_grid_demo(void) {
