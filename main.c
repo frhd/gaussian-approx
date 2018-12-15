@@ -1123,6 +1123,8 @@ static void run_demo_multi(Config *cfg) {
 	int L = cfg->L;
 	int ntargets = cfg->ntargets;
 	float xmin, xmax, ymin, ymax, margin;
+	float err_sum[MAX_TARGETS] = {0};
+	float err_max[MAX_TARGETS] = {0};
 
 	Target targets[MAX_TARGETS];
 	Matrix Cw, Cv, m_opt, y;
@@ -1191,17 +1193,63 @@ static void run_demo_multi(Config *cfg) {
 	xmin -= margin; xmax += margin;
 	ymin -= margin; ymax += margin;
 
-	printf("multi-target setup: %d targets, grid [%.1f,%.1f] x [%.1f,%.1f]\n",
-		ntargets, xmin, xmax, ymin, ymax);
+	if (!cfg->quiet) {
+		viz_clear_screen();
+		printf("Multi-target tracking demo\n");
+		printf("targets: %d, dt=%.2f, L=%d, nsteps=%d\n\n", ntargets, dt, L, nsteps);
 
-	/* preview */
-	viz_grid_init(&g, xmin, xmax, ymin, ymax);
-	for (k = 0; k < ntargets; k++) {
-		Matrix pos = targets[k].scen->true_pos;
-		for (i = 0; i < nsteps; i++)
-			viz_grid_point(&g, elem(pos, i, 0), elem(pos, i, 1), targets[k].marker + 32);
+		viz_grid_init(&g, xmin, xmax, ymin, ymax);
+		for (k = 0; k < ntargets; k++) {
+			Matrix pos = targets[k].scen->true_pos;
+			for (i = 0; i < nsteps; i++)
+				viz_grid_point(&g, elem(pos, i, 0), elem(pos, i, 1), targets[k].marker + 32);
+		}
+		viz_grid_print(&g);
+		printf("\n");
+		viz_color(COL_DIM);
+		printf("  trajectory preview -- press enter or wait...\n");
+		viz_color(COL_RESET);
+		usleep(2000000);
 	}
-	viz_grid_print(&g);
+
+	for (i = 0; i < nsteps; i++) {
+		for (k = 0; k < ntargets; k++) {
+			float est_x, est_y, true_x, true_y, err;
+
+			if (!targets[k].active) continue;
+
+			true_x = elem(targets[k].scen->true_pos, i, 0);
+			true_y = elem(targets[k].scen->true_pos, i, 1);
+
+			gaussianEstimator_Pred(&targets[k].xEst, &targets[k].CEst,
+				NULL, &Cw, afun_2d, &dt, &m_opt);
+
+			setElem(y, 0, 0, elem(targets[k].scen->measurements, i, 0));
+			setElem(y, 1, 0, elem(targets[k].scen->measurements, i, 1));
+			gaussianEstimator_Est(&targets[k].xEst, &targets[k].CEst,
+				&y, &Cv, hfun_2d, &m_opt);
+
+			est_x = elem(targets[k].xEst, 0, 0);
+			est_y = elem(targets[k].xEst, 1, 0);
+			err = sqrt((est_x - true_x) * (est_x - true_x) +
+			           (est_y - true_y) * (est_y - true_y));
+			err_sum[k] += err;
+			if (err > err_max[k]) err_max[k] = err;
+		}
+	}
+
+	{
+		int worst = 0;
+		printf("\n--- multi-target summary ---\n");
+		printf("targets: %d, steps: %d\n", ntargets, nsteps);
+		for (k = 0; k < ntargets; k++) {
+			float rmse_k = err_sum[k] / nsteps;
+			printf("  target %c: avg RMSE=%.3f  max err=%.3f\n",
+				targets[k].marker, rmse_k, err_max[k]);
+			if (rmse_k > err_sum[worst] / nsteps) worst = k;
+		}
+		printf("  worst: target %c\n", targets[worst].marker);
+	}
 
 	sim_free_targets(targets, ntargets);
 	freeMatrix(Cw);
