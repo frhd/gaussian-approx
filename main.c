@@ -1116,6 +1116,114 @@ cleanup_2d:
 	freeMatrix(y);
 }
 
+
+/* multi-target rendering */
+static void render_frame_multi(Grid *g, Config *cfg, Target *targets, int ntargets,
+	int step, int nsteps, float avg_rmse,
+	int paused, float elapsed) {
+	int k, wide;
+	Panel sp;
+	char buf[64];
+	const char *target_cols[] = {COL_GREEN, COL_YELLOW, COL_CYAN, COL_RED};
+
+	wide = viz_term_width() >= 80;
+
+	viz_clear_screen();
+
+	/* header */
+	viz_cursor_move(1, 1);
+	printf("Multi-target tracking (%d targets)  ", ntargets);
+	viz_color(COL_BOLD);
+	printf("[step %d/%d]", step + 1, nsteps);
+	viz_color(COL_RESET);
+	printf("  ");
+	if (paused) {
+		viz_color(COL_YELLOW);
+		printf("[PAUSED]");
+	} else {
+		viz_color(COL_GREEN);
+		printf("[RUNNING]");
+	}
+	viz_color(COL_RESET);
+	viz_color(COL_DIM);
+	printf("  %.1fs", elapsed);
+	viz_color(COL_RESET);
+
+	/* grid */
+	viz_grid_print_at(g, 3, 1);
+
+	if (wide) {
+		sp.row = 3;
+		sp.col = 7 + GRID_W + 2;
+		sp.width = 18;
+		sp.height = 4 + ntargets * 3;
+		viz_panel_border(&sp);
+
+		snprintf(buf, sizeof(buf), " %d targets", ntargets);
+		viz_panel_text(&sp, 0, buf);
+
+		for (k = 0; k < ntargets; k++) {
+			int line = 2 + k * 3;
+			float ex = elem(targets[k].xEst, 0, 0);
+			float ey = elem(targets[k].xEst, 1, 0);
+
+			viz_cursor_move(sp.row + 1 + line, sp.col + 1);
+			viz_color(target_cols[k]);
+			printf(" %c", targets[k].marker);
+			viz_color(COL_RESET);
+			printf(": %5.1f,%5.1f", ex, ey);
+
+			snprintf(buf, sizeof(buf), "   P:%.1f",
+				elem(targets[k].CEst, 0, 0) + elem(targets[k].CEst, 1, 1));
+			viz_panel_text(&sp, line + 1, buf);
+		}
+	}
+
+	/* legend below grid */
+	{
+		int brow = 3 + GRID_H + 2;
+		viz_cursor_move(brow, 1);
+
+		for (k = 0; k < ntargets; k++) {
+			viz_cursor_move(brow + k, 1);
+			printf("  ");
+			viz_color(target_cols[k]);
+			printf("%c", targets[k].marker);
+			viz_color(COL_RESET);
+			printf("/%c target %d  ", targets[k].marker + 32, k + 1);
+		}
+
+		viz_cursor_move(brow + ntargets, 1);
+		printf("  ");
+		viz_color(COL_DIM);
+		printf("?");
+		viz_color(COL_RESET);
+		printf(" measurement dropout");
+
+		viz_cursor_move(brow + ntargets + 1, 1);
+		printf("  avg RMSE: ");
+		if (avg_rmse < 2.0) viz_color(COL_GREEN);
+		else if (avg_rmse < 5.0) viz_color(COL_YELLOW);
+		else viz_color(COL_RED);
+		printf("%.3f", avg_rmse);
+		viz_color(COL_RESET);
+
+		viz_cursor_move(brow + ntargets + 2, 3);
+		viz_progress_bar(step, nsteps, 30);
+	}
+
+	if (step == 0 && cfg->interactive) {
+		int hrow = 3 + GRID_H + ntargets + 5;
+		viz_cursor_move(hrow, 1);
+		viz_color(COL_DIM);
+		printf("  [space] step  [p]ause  [r]estart  [+/-] speed  [q]uit");
+		viz_color(COL_RESET);
+	}
+
+	viz_cursor_move(3 + GRID_H + ntargets + 7, 1);
+	fflush(stdout);
+}
+
 static void run_demo_multi(Config *cfg) {
 	int i, k;
 	int nsteps = cfg->nsteps;
@@ -1215,17 +1323,28 @@ static void run_demo_multi(Config *cfg) {
 	for (i = 0; i < nsteps; i++) {
 		for (k = 0; k < ntargets; k++) {
 			float est_x, est_y, true_x, true_y, err;
+			int dropout;
+			Matrix meas;
 
 			if (!targets[k].active) continue;
 
 			true_x = elem(targets[k].scen->true_pos, i, 0);
 			true_y = elem(targets[k].scen->true_pos, i, 1);
+			meas = targets[k].scen->measurements;
 
+			/* predict */
 			gaussianEstimator_Pred(&targets[k].xEst, &targets[k].CEst,
 				NULL, &Cw, afun_2d, &dt, &m_opt);
 
-			setElem(y, 0, 0, elem(targets[k].scen->measurements, i, 0));
-			setElem(y, 1, 0, elem(targets[k].scen->measurements, i, 1));
+			/* measurement dropout check */
+			dropout = sim_measurement_dropout();
+
+			if (!dropout) {
+				setElem(y, 0, 0, elem(meas, i, 0));
+				setElem(y, 1, 0, elem(meas, i, 1));
+			}
+
+			/* update */
 			gaussianEstimator_Est(&targets[k].xEst, &targets[k].CEst,
 				&y, &Cv, hfun_2d, &m_opt);
 
