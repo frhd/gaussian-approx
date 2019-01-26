@@ -1116,7 +1116,6 @@ cleanup_2d:
 	freeMatrix(y);
 }
 
-
 /* multi-target rendering */
 static void render_frame_multi(Grid *g, Config *cfg, Target *targets, int ntargets,
 	int step, int nsteps, float avg_rmse,
@@ -1233,6 +1232,10 @@ static void run_demo_multi(Config *cfg) {
 	float xmin, xmax, ymin, ymax, margin;
 	float err_sum[MAX_TARGETS] = {0};
 	float err_max[MAX_TARGETS] = {0};
+	float avg_rmse;
+	int paused, speed;
+	struct timeval t_start, t_now;
+	int action = 0;
 
 	Target targets[MAX_TARGETS];
 	Matrix Cw, Cv, m_opt, y;
@@ -1245,6 +1248,7 @@ static void run_demo_multi(Config *cfg) {
 	if (ntargets < 1) ntargets = 1;
 	if (ntargets > MAX_TARGETS) ntargets = MAX_TARGETS;
 
+	/* shared filter constants */
 	Cw = zeroMatrix(6, 6);
 	setElem(Cw, 0, 0, 0.01);
 	setElem(Cw, 1, 1, 0.01);
@@ -1260,8 +1264,15 @@ static void run_demo_multi(Config *cfg) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(2, 1);
 
+	speed = cfg->speed;
+
+	if (!cfg->quiet && cfg->interactive)
+		term_raw_mode();
+
+	/* generate scenarios for all targets */
 	sim_multi_scenario(targets, ntargets, nsteps, dt, 2.0);
 
+	/* init filter state for each target */
 	for (k = 0; k < ntargets; k++) {
 		if (!targets[k].scen) continue;
 		targets[k].xEst = zeroMatrix(6, 1);
@@ -1277,7 +1288,7 @@ static void run_demo_multi(Config *cfg) {
 		setElem(targets[k].CEst, 5, 5, 0.001);
 	}
 
-	/* auto-scale grid */
+	/* auto-scale grid to fit all targets */
 	xmin = xmax = elem(targets[0].scen->true_pos, 0, 0);
 	ymin = ymax = elem(targets[0].scen->true_pos, 0, 1);
 	for (k = 0; k < ntargets; k++) {
@@ -1301,11 +1312,14 @@ static void run_demo_multi(Config *cfg) {
 	xmin -= margin; xmax += margin;
 	ymin -= margin; ymax += margin;
 
+	paused = cfg->interactive;
+
 	if (!cfg->quiet) {
 		viz_clear_screen();
 		printf("Multi-target tracking demo\n");
 		printf("targets: %d, dt=%.2f, L=%d, nsteps=%d\n\n", ntargets, dt, L, nsteps);
 
+		/* trajectory preview */
 		viz_grid_init(&g, xmin, xmax, ymin, ymax);
 		for (k = 0; k < ntargets; k++) {
 			Matrix pos = targets[k].scen->true_pos;
@@ -1320,7 +1334,28 @@ static void run_demo_multi(Config *cfg) {
 		usleep(2000000);
 	}
 
-	for (i = 0; i < nsteps; i++) {
+	gettimeofday(&t_start, NULL);
+
+	for (i = 0; i < nsteps; ) {
+		float elapsed;
+		int ret;
+
+		if (!cfg->quiet && cfg->interactive) {
+			while (paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) { action = -1; goto end_multi; }
+				if (ret == -2) { action = -2; goto end_multi; }
+				if (ret == 1) break;
+				usleep(20000);
+			}
+			if (!paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) { action = -1; goto end_multi; }
+				if (ret == -2) { action = -2; goto end_multi; }
+			}
+		}
+
+		/* run filter for each target */
 		for (k = 0; k < ntargets; k++) {
 			float est_x, est_y, true_x, true_y, err;
 			int dropout;
@@ -1355,8 +1390,69 @@ static void run_demo_multi(Config *cfg) {
 			err_sum[k] += err;
 			if (err > err_max[k]) err_max[k] = err;
 		}
+
+		/* compute average rmse across all targets */
+		avg_rmse = 0;
+		for (k = 0; k < ntargets; k++)
+			avg_rmse += err_sum[k] / (i + 1);
+		avg_rmse /= ntargets;
+
+		if (!cfg->quiet) {
+			/* render grid */
+			viz_grid_init(&g, xmin, xmax, ymin, ymax);
+
+			/* draw ellipses first */
+			for (k = 0; k < ntargets; k++) {
+				float ex = elem(targets[k].xEst, 0, 0);
+				float ey = elem(targets[k].xEst, 1, 0);
+				viz_grid_ellipse(&g, ex, ey, targets[k].CEst, '~');
+			}
+
+			/* draw trajectories with trail */
+			for (k = 0; k < ntargets; k++) {
+				Matrix pos = targets[k].scen->true_pos;
+				Matrix ms = targets[k].scen->measurements;
+				int j, trail = 10;
+				char mch = targets[k].marker + 32;  /* lowercase */
+
+				for (j = 0; j <= i; j++) {
+					char ch = (i - j > trail) ? ',' : '.';
+					viz_grid_point(&g, elem(pos, j, 0), elem(pos, j, 1), ch);
+				}
+
+				/* measurements */
+				for (j = 0; j < i; j++)
+					viz_grid_point(&g, elem(ms, j, 0), elem(ms, j, 1), mch);
+
+				/* current measurement or dropout marker */
+				if (!sim_measurement_dropout())
+					viz_grid_point(&g, elem(ms, i, 0), elem(ms, i, 1), mch);
+				else
+					viz_grid_point(&g, elem(pos, i, 0), elem(pos, i, 1), '?');
+
+				/* estimate marker */
+				viz_grid_point(&g, elem(targets[k].xEst, 0, 0),
+					elem(targets[k].xEst, 1, 0), targets[k].marker);
+			}
+
+			gettimeofday(&t_now, NULL);
+			elapsed = (t_now.tv_sec - t_start.tv_sec) +
+				(t_now.tv_usec - t_start.tv_usec) / 1e6;
+
+			render_frame_multi(&g, cfg, targets, ntargets, i, nsteps,
+				avg_rmse, paused, elapsed);
+
+			usleep(speed * 1000);
+		}
+
+		i++;
 	}
 
+end_multi:
+	if (!cfg->quiet && cfg->interactive)
+		term_restore();
+
+	/* print summary */
 	{
 		int worst = 0;
 		printf("\n--- multi-target summary ---\n");
@@ -1370,6 +1466,7 @@ static void run_demo_multi(Config *cfg) {
 		printf("  worst: target %c\n", targets[worst].marker);
 	}
 
+	/* cleanup */
 	sim_free_targets(targets, ntargets);
 	freeMatrix(Cw);
 	freeMatrix(Cv);
