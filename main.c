@@ -1248,7 +1248,7 @@ static void run_demo_multi(Config *cfg) {
 	if (ntargets < 1) ntargets = 1;
 	if (ntargets > MAX_TARGETS) ntargets = MAX_TARGETS;
 
-	/* shared filter constants — same for all targets */
+	/* shared filter constants */
 	Cw = zeroMatrix(6, 6);
 	setElem(Cw, 0, 0, 0.01);
 	setElem(Cw, 1, 1, 0.01);
@@ -1377,11 +1377,11 @@ static void run_demo_multi(Config *cfg) {
 			if (!dropout) {
 				setElem(y, 0, 0, elem(meas, i, 0));
 				setElem(y, 1, 0, elem(meas, i, 1));
+				/* update with measurement */
+				gaussianEstimator_Est(&targets[k].xEst, &targets[k].CEst,
+					&y, &Cv, hfun_2d, &m_opt);
 			}
-
-			/* update */
-			gaussianEstimator_Est(&targets[k].xEst, &targets[k].CEst,
-				&y, &Cv, hfun_2d, &m_opt);
+			/* if dropout, skip update — covariance grows from prediction only */
 
 			est_x = elem(targets[k].xEst, 0, 0);
 			est_y = elem(targets[k].xEst, 1, 0);
@@ -1464,6 +1464,7 @@ end_multi:
 			if (rmse_k > err_sum[worst] / nsteps) worst = k;
 		}
 		printf("  worst: target %c\n", targets[worst].marker);
+		printf("  overall avg RMSE: %.3f\n", avg_rmse);
 	}
 
 	/* cleanup */
