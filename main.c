@@ -1456,12 +1456,12 @@ end_multi:
 	{
 		int worst = 0;
 		printf("\n--- multi-target summary ---\n");
-		printf("targets: %d, steps: %d\n", ntargets, nsteps);
+		printf("targets: %d, steps: %d\n", ntargets, i);
 		for (k = 0; k < ntargets; k++) {
-			float rmse_k = err_sum[k] / nsteps;
+			float rmse_k = err_sum[k] / (i > 0 ? i : 1);
 			printf("  target %c: avg RMSE=%.3f  max err=%.3f\n",
 				targets[k].marker, rmse_k, err_max[k]);
-			if (rmse_k > err_sum[worst] / nsteps) worst = k;
+			if (rmse_k > err_sum[worst] / (i > 0 ? i : 1)) worst = k;
 		}
 		printf("  worst: target %c\n", targets[worst].marker);
 		printf("  overall avg RMSE: %.3f\n", avg_rmse);
