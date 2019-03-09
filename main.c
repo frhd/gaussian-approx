@@ -1455,6 +1455,8 @@ end_multi:
 	/* print summary */
 	{
 		int worst = 0;
+		if (action != 0)
+			printf("\nstopped at step %d/%d\n", i, nsteps);
 		printf("\n--- multi-target summary ---\n");
 		printf("targets: %d, steps: %d\n", ntargets, i);
 		for (k = 0; k < ntargets; k++) {
