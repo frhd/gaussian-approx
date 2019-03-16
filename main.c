@@ -1248,7 +1248,7 @@ static void run_demo_multi(Config *cfg) {
 	if (ntargets < 1) ntargets = 1;
 	if (ntargets > MAX_TARGETS) ntargets = MAX_TARGETS;
 
-	/* shared filter constants */
+	/* shared filter constants — same for all targets */
 	Cw = zeroMatrix(6, 6);
 	setElem(Cw, 0, 0, 0.01);
 	setElem(Cw, 1, 1, 0.01);
