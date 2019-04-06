@@ -20,6 +20,7 @@
 #define MODE_TEST  2
 #define MODE_GRID  3
 #define MODE_MULTI 4
+#define MODE_ROT   5
 
 typedef struct {
 	int mode;
@@ -1519,6 +1520,7 @@ static int parse_mode(const char *s) {
 	if (strcmp(s, "2d") == 0) return MODE_2D;
 	if (strcmp(s, "1d") == 0) return MODE_1D;
 	if (strcmp(s, "multi") == 0) return MODE_MULTI;
+	if (strcmp(s, "rot") == 0) return MODE_ROT;
 	if (strcmp(s, "test") == 0) return MODE_TEST;
 	if (strcmp(s, "grid") == 0) return MODE_GRID;
 	return -1;
@@ -1645,7 +1647,7 @@ int main(int argc, char *argv[]) {
 
 	/* print config summary */
 	if (!cfg.quiet) {
-		const char *mnames[] = {"2d", "1d", "test", "grid", "multi"};
+		const char *mnames[] = {"2d", "1d", "test", "grid", "multi", "rot"};
 		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s%s",
 			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
 			cfg.nsteps, cfg.dt, cfg.L,
@@ -1670,6 +1672,9 @@ int main(int argc, char *argv[]) {
 		break;
 	case MODE_1D:
 		run_demo(&cfg);
+		break;
+	case MODE_ROT:
+		printf("rotation demo not yet implemented\n");
 		break;
 	case MODE_MULTI:
 		run_demo_multi(&cfg);
