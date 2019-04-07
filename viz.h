@@ -57,6 +57,9 @@ void viz_panel_text(Panel *p, int line, const char *text);
 void viz_clear_screen(void);
 int  viz_term_width(void);
 
+/* 3d projection */
+void viz_project_3d(float x, float y, float z, float *px, float *py);
+
 /* terminal raw mode for interactive input */
 void term_raw_mode(void);
 void term_restore(void);

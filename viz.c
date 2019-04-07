@@ -467,6 +467,13 @@ void viz_panel_text(Panel *p, int line, const char *text) {
 	printf("%-*.*s", maxw, maxw, text);
 }
 
+/* simple orthographic 3d -> 2d projection
+ * isometric-ish: px = x + 0.5*z, py = y + 0.3*z */
+void viz_project_3d(float x, float y, float z, float *px, float *py) {
+	*px = x + 0.5 * z;
+	*py = y + 0.3 * z;
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
