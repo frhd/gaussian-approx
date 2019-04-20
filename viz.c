@@ -467,6 +467,41 @@ void viz_panel_text(Panel *p, int line, const char *text) {
 	printf("%-*.*s", maxw, maxw, text);
 }
 
+/* Rodrigues rotation: R = I + sin(t)/t * K + (1-cos(t))/t^2 * K^2
+ * where K is skew-symmetric of rotation vector, t = |rot| */
+static void rodrigues(float rot[3], float R[3][3]) {
+	float theta = sqrt(rot[0]*rot[0] + rot[1]*rot[1] + rot[2]*rot[2]);
+	float K[3][3] = {{0, -rot[2], rot[1]},
+	                  {rot[2], 0, -rot[0]},
+	                  {-rot[1], rot[0], 0}};
+	int i, j, k;
+
+	if (theta < 1e-6) {
+		/* identity */
+		for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++)
+				R[i][j] = (i == j) ? 1.0 : 0.0;
+		return;
+	}
+
+	{
+		float s = sin(theta) / theta;
+		float c = (1.0 - cos(theta)) / (theta * theta);
+		float K2[3][3];
+
+		for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++) {
+				K2[i][j] = 0;
+				for (k = 0; k < 3; k++)
+					K2[i][j] += K[i][k] * K[k][j];
+			}
+
+		for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++)
+				R[i][j] = (i == j ? 1.0 : 0.0) + s * K[i][j] + c * K2[i][j];
+	}
+}
+
 /* simple orthographic 3d -> 2d projection
  * isometric-ish: px = x + 0.5*z, py = y + 0.3*z */
 void viz_project_3d(float x, float y, float z, float *px, float *py) {
