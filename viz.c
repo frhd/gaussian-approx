@@ -509,6 +509,47 @@ void viz_project_3d(float x, float y, float z, float *px, float *py) {
 	*py = y + 0.3 * z;
 }
 
+/* draw rotated 3d axes on grid using rotation vector */
+void viz_grid_axes_3d(Grid *g, float cx, float cy, float rot[3]) {
+	float R[3][3];
+	float axes[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+	char labels[] = {'x', 'y', 'z'};
+	float len = 2.0;
+	int a, i;
+
+	rodrigues(rot, R);
+
+	for (a = 0; a < 3; a++) {
+		float rx = 0, ry = 0, rz = 0;
+		for (i = 0; i < 3; i++) {
+			rx += R[0][i] * axes[a][i];
+			ry += R[1][i] * axes[a][i];
+			rz += R[2][i] * axes[a][i];
+		}
+		rx *= len; ry *= len; rz *= len;
+
+		{
+			int npts = 12;
+			int k;
+			for (k = 0; k <= npts; k++) {
+				float t = (float)k / npts;
+				float px, py;
+				viz_project_3d(rx * t, ry * t, rz * t, &px, &py);
+				px = cx + px * 2.0;
+				py = cy + py;
+				if (px >= g->xmin && px <= g->xmax &&
+				    py >= g->ymin && py <= g->ymax) {
+					int gx = viz_grid_map_x(g, px);
+					int gy = viz_grid_map_y(g, py);
+					char ch = (k == npts) ? labels[a] : '-';
+					if (g->cells[gy][gx] == ' ' || k == npts)
+						g->cells[gy][gx] = ch;
+				}
+			}
+		}
+	}
+}
+
 void term_restore(void) {
 	if (raw_mode_active) {
 		tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);

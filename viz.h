@@ -59,6 +59,7 @@ int  viz_term_width(void);
 
 /* 3d projection */
 void viz_project_3d(float x, float y, float z, float *px, float *py);
+void viz_grid_axes_3d(Grid *g, float cx, float cy, float rot[3]);
 
 /* terminal raw mode for interactive input */
 void term_raw_mode(void);
