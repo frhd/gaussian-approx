@@ -209,6 +209,18 @@ static void viz_grid_putchar(char ch, int r, int c) {
 		viz_color(COL_DIM);
 		putchar(ch);
 		viz_color(COL_RESET);
+	} else if (ch == 'x') {
+		viz_color(COL_RED);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'y') {
+		viz_color(COL_GREEN);
+		putchar(ch);
+		viz_color(COL_RESET);
+	} else if (ch == 'z') {
+		viz_color(COL_BLUE);
+		putchar(ch);
+		viz_color(COL_RESET);
 	} else {
 		putchar(ch);
 	}
