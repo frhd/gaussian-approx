@@ -122,6 +122,19 @@ Matrix hfun_2d(Matrix m) {
 	return out;
 }
 
+
+/* observe 3d position from 12-state: extract rows 0-2 */
+Matrix hfun_3d(Matrix m) {
+	int j;
+	Matrix out = newMatrix(3, m->width);
+	for (j = 0; j < m->width; j++) {
+		setElem(out, 0, j, elem(m, 0, j));
+		setElem(out, 1, j, elem(m, 1, j));
+		setElem(out, 2, j, elem(m, 2, j));
+	}
+	return out;
+}
+
 static void run_tests(void) {
 	Matrix m, m2, r;
 
