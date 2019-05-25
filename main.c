@@ -1491,6 +1491,79 @@ end_multi:
 	freeMatrix(y);
 }
 
+static void run_demo_rot(Config *cfg) {
+	int nsteps = cfg->nsteps;
+	float dt = cfg->dt;
+	int L = cfg->L;
+
+	Matrix xEst, CEst, Cw, Cv, m_opt, y;
+
+	if (nsteps <= 0) {
+		printf("nothing to do (nsteps=0)\n");
+		return;
+	}
+
+	/* initial filter state — 12-state vector */
+	xEst = zeroMatrix(12, 1);
+	setElem(xEst, 0, 0, 0.0);  /* pos x */
+	setElem(xEst, 1, 0, 0.0);  /* pos y */
+	setElem(xEst, 2, 0, 0.0);  /* pos z */
+	/* rot, angvel, linvel start at zero */
+
+	/* initial covariance 12x12 */
+	CEst = zeroMatrix(12, 12);
+	/* position uncertainty */
+	setElem(CEst, 0, 0, 5.0);
+	setElem(CEst, 1, 1, 5.0);
+	setElem(CEst, 2, 2, 5.0);
+	/* high rotation uncertainty */
+	setElem(CEst, 3, 3, 1.0);
+	setElem(CEst, 4, 4, 1.0);
+	setElem(CEst, 5, 5, 1.0);
+	/* angular velocity */
+	setElem(CEst, 6, 6, 0.5);
+	setElem(CEst, 7, 7, 0.5);
+	setElem(CEst, 8, 8, 0.5);
+	/* linear velocity */
+	setElem(CEst, 9, 9, 2.0);
+	setElem(CEst, 10, 10, 2.0);
+	setElem(CEst, 11, 11, 2.0);
+
+	/* process noise 12x12 */
+	Cw = zeroMatrix(12, 12);
+	setElem(Cw, 0, 0, 0.01);
+	setElem(Cw, 1, 1, 0.01);
+	setElem(Cw, 2, 2, 0.01);
+	setElem(Cw, 3, 3, 0.005);
+	setElem(Cw, 4, 4, 0.005);
+	setElem(Cw, 5, 5, 0.005);
+	setElem(Cw, 6, 6, 0.01);
+	setElem(Cw, 7, 7, 0.01);
+	setElem(Cw, 8, 8, 0.01);
+	setElem(Cw, 9, 9, 0.05);
+	setElem(Cw, 10, 10, 0.05);
+	setElem(Cw, 11, 11, 0.05);
+
+	/* measurement noise — observe position(3) */
+	Cv = zeroMatrix(3, 3);
+	setElem(Cv, 0, 0, 4.0);
+	setElem(Cv, 1, 1, 4.0);
+	setElem(Cv, 2, 2, 4.0);
+
+	m_opt = gaussianApprox(L);
+	y = newMatrix(3, 1);
+
+	printf("rotation demo: 12-state, dt=%.2f, L=%d, nsteps=%d\n", dt, L, nsteps);
+	printf("(filter loop not implemented yet)\n");
+
+	freeMatrix(xEst);
+	freeMatrix(CEst);
+	freeMatrix(Cw);
+	freeMatrix(Cv);
+	freeMatrix(m_opt);
+	freeMatrix(y);
+}
+
 static void run_grid_demo(void) {
 	int k, npts = 50;
 	Grid g;
@@ -1687,7 +1760,7 @@ int main(int argc, char *argv[]) {
 		run_demo(&cfg);
 		break;
 	case MODE_ROT:
-		printf("rotation demo not yet implemented\n");
+		run_demo_rot(&cfg);
 		break;
 	case MODE_MULTI:
 		run_demo_multi(&cfg);
