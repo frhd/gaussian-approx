@@ -1553,8 +1553,41 @@ static void run_demo_rot(Config *cfg) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(3, 1);
 
-	printf("rotation demo: 12-state, dt=%.2f, L=%d, nsteps=%d\n", dt, L, nsteps);
-	printf("(filter loop not implemented yet)\n");
+	/* true state: [pos(3), rot(3), angvel(3), linvel(3)] = 12 elements */
+	{
+		int i;
+		float true_pos[3] = {0, 0, 0};
+		float true_rot[3] = {0, 0, 0};
+		float true_angvel[3] = {0, 0, 0.3};  /* slow z rotation */
+		float true_linvel[3] = {0.5, 0.2, 0};
+		float err_sum = 0;
+
+		for (i = 0; i < nsteps; i++) {
+			/* propagate true state */
+			true_pos[0] += true_linvel[0] * dt + 0.01 * randn();
+			true_pos[1] += true_linvel[1] * dt + 0.01 * randn();
+			true_pos[2] += 0.01 * randn();  /* slight z wobble */
+
+			/* rotation: add angular velocity * dt + noise */
+			true_rot[0] += (true_angvel[0] + 0.05 * randn()) * dt;
+			true_rot[1] += (true_angvel[1] + 0.05 * randn()) * dt;
+			true_rot[2] += (true_angvel[2]) * dt;
+
+			/* slight wobble on x angular velocity */
+			true_angvel[0] = 0.1 * sin(0.02 * i);
+
+			/* generate noisy position measurement */
+			setElem(y, 0, 0, true_pos[0] + 2.0 * randn());
+			setElem(y, 1, 0, true_pos[1] + 2.0 * randn());
+			setElem(y, 2, 0, true_pos[2] + 2.0 * randn());
+
+			err_sum += sqrt(true_pos[0]*true_pos[0] + true_pos[1]*true_pos[1] + true_pos[2]*true_pos[2]);
+		}
+
+		printf("rotation demo: %d steps, dt=%.2f, L=%d\n", nsteps, dt, L);
+		printf("final true pos: (%.2f, %.2f, %.2f)\n", true_pos[0], true_pos[1], true_pos[2]);
+		printf("final true rot: (%.3f, %.3f, %.3f)\n", true_rot[0], true_rot[1], true_rot[2]);
+	}
 
 	freeMatrix(xEst);
 	freeMatrix(CEst);
