@@ -1581,12 +1581,51 @@ static void run_demo_rot(Config *cfg) {
 			setElem(y, 1, 0, true_pos[1] + 2.0 * randn());
 			setElem(y, 2, 0, true_pos[2] + 2.0 * randn());
 
-			err_sum += sqrt(true_pos[0]*true_pos[0] + true_pos[1]*true_pos[1] + true_pos[2]*true_pos[2]);
+			/* predict using decomp (rotation-aware) */
+			gaussianEstimator_Pred_decomp(&xEst, &CEst, NULL, &Cw, &dt, &m_opt);
+
+			/* update with position measurement */
+			gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_3d, &m_opt);
+
+			/* extract estimates */
+			{
+				float est_pos[3], est_rot[3];
+				float pos_err, rot_err;
+
+				est_pos[0] = elem(xEst, 0, 0);
+				est_pos[1] = elem(xEst, 1, 0);
+				est_pos[2] = elem(xEst, 2, 0);
+				est_rot[0] = elem(xEst, 3, 0);
+				est_rot[1] = elem(xEst, 4, 0);
+				est_rot[2] = elem(xEst, 5, 0);
+
+				pos_err = sqrt((est_pos[0] - true_pos[0]) * (est_pos[0] - true_pos[0]) +
+				               (est_pos[1] - true_pos[1]) * (est_pos[1] - true_pos[1]) +
+				               (est_pos[2] - true_pos[2]) * (est_pos[2] - true_pos[2]));
+
+				{
+					float dr[3];
+					dr[0] = est_rot[0] - true_rot[0];
+					dr[1] = est_rot[1] - true_rot[1];
+					dr[2] = est_rot[2] - true_rot[2];
+					rot_err = sqrt(dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2]);
+				}
+
+				err_sum += pos_err;
+			}
 		}
 
-		printf("rotation demo: %d steps, dt=%.2f, L=%d\n", nsteps, dt, L);
-		printf("final true pos: (%.2f, %.2f, %.2f)\n", true_pos[0], true_pos[1], true_pos[2]);
-		printf("final true rot: (%.3f, %.3f, %.3f)\n", true_rot[0], true_rot[1], true_rot[2]);
+		{
+			float final_rmse = err_sum / (nsteps > 0 ? nsteps : 1);
+			printf("rotation demo: %d steps, dt=%.2f, L=%d\n", nsteps, dt, L);
+			printf("avg pos RMSE: %.3f\n", final_rmse);
+			printf("final pos estimate: (%.2f, %.2f, %.2f)\n",
+				elem(xEst, 0, 0), elem(xEst, 1, 0), elem(xEst, 2, 0));
+			printf("final rot estimate: (%.3f, %.3f, %.3f)\n",
+				elem(xEst, 3, 0), elem(xEst, 4, 0), elem(xEst, 5, 0));
+			printf("true rot: (%.3f, %.3f, %.3f)\n",
+				true_rot[0], true_rot[1], true_rot[2]);
+		}
 	}
 
 	freeMatrix(xEst);
