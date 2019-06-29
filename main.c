@@ -1491,6 +1491,131 @@ end_multi:
 	freeMatrix(y);
 }
 
+/* rotation demo — render frame */
+static void render_frame_rot(Grid *g, Config *cfg, int step, int nsteps,
+	float true_rot[3], float est_rot[3], float rot_err,
+	float pos_err, float rmse, int paused, float elapsed) {
+	int wide = viz_term_width() >= 80;
+	Panel sp;
+	char buf[64];
+
+	viz_clear_screen();
+
+	viz_cursor_move(1, 1);
+	printf("3D rotation tracking  ");
+	viz_color(COL_BOLD);
+	printf("[step %d/%d]", step + 1, nsteps);
+	viz_color(COL_RESET);
+	printf("  ");
+	if (paused) {
+		viz_color(COL_YELLOW);
+		printf("[PAUSED]");
+	} else {
+		viz_color(COL_GREEN);
+		printf("[RUNNING]");
+	}
+	viz_color(COL_RESET);
+	viz_color(COL_DIM);
+	printf("  %.1fs", elapsed);
+	viz_color(COL_RESET);
+
+	viz_grid_print_at(g, 3, 1);
+
+	if (wide) {
+		sp.row = 3;
+		sp.col = 7 + GRID_W + 2;
+		sp.width = 22;
+		sp.height = 18;
+		viz_panel_border(&sp);
+
+		viz_panel_text(&sp, 0, "  rotation demo");
+
+		snprintf(buf, sizeof(buf), " Step %d/%d", step + 1, nsteps);
+		viz_panel_text(&sp, 2, buf);
+
+		viz_cursor_move(sp.row + 1 + 4, sp.col + 1);
+		viz_color(COL_GREEN);
+		printf(" true rot:");
+		viz_color(COL_RESET);
+		snprintf(buf, sizeof(buf), "  %.2f %.2f %.2f", true_rot[0], true_rot[1], true_rot[2]);
+		viz_panel_text(&sp, 5, buf);
+
+		viz_cursor_move(sp.row + 1 + 7, sp.col + 1);
+		viz_color(COL_CYAN);
+		printf(" est rot:");
+		viz_color(COL_RESET);
+		snprintf(buf, sizeof(buf), "  %.2f %.2f %.2f", est_rot[0], est_rot[1], est_rot[2]);
+		viz_panel_text(&sp, 8, buf);
+
+		snprintf(buf, sizeof(buf), " rot err: %.3f", rot_err);
+		viz_panel_text(&sp, 10, buf);
+		snprintf(buf, sizeof(buf), " pos err: %.3f", pos_err);
+		viz_panel_text(&sp, 11, buf);
+
+		viz_cursor_move(sp.row + 1 + 13, sp.col + 1);
+		printf(" RMSE: ");
+		if (rmse < 2.0) viz_color(COL_GREEN);
+		else if (rmse < 5.0) viz_color(COL_YELLOW);
+		else viz_color(COL_RED);
+		printf("%5.2f", rmse);
+		viz_color(COL_RESET);
+	}
+
+	/* legend below grid */
+	{
+		int brow = 3 + GRID_H + 2;
+		viz_cursor_move(brow, 1);
+		printf("  ");
+		viz_color(COL_GREEN);
+		printf(".");
+		viz_color(COL_RESET);
+		printf(" true position    ");
+		viz_color(COL_CYAN);
+		printf("+");
+		viz_color(COL_RESET);
+		printf(" estimate");
+
+		viz_cursor_move(brow + 1, 1);
+		printf("  ");
+		viz_color(COL_RED);
+		printf("x");
+		viz_color(COL_RESET);
+		printf("/");
+		viz_color(COL_GREEN);
+		printf("y");
+		viz_color(COL_RESET);
+		printf("/");
+		viz_color(COL_BLUE);
+		printf("z");
+		viz_color(COL_RESET);
+		printf(" rotated axes");
+
+		if (!wide) {
+			viz_cursor_move(brow + 2, 1);
+			printf("  rot err: %.3f  pos err: %.3f  RMSE: ", rot_err, pos_err);
+			if (rmse < 2.0) viz_color(COL_GREEN);
+			else if (rmse < 5.0) viz_color(COL_YELLOW);
+			else viz_color(COL_RED);
+			printf("%.3f", rmse);
+			viz_color(COL_RESET);
+		}
+
+		viz_cursor_move(brow + (wide ? 2 : 3), 3);
+		viz_progress_bar(step, nsteps, 30);
+	}
+
+	if (step == 0 && cfg->interactive) {
+		int hrow = 3 + GRID_H + (wide ? 5 : 6);
+		viz_cursor_move(hrow, 1);
+		viz_color(COL_DIM);
+		printf("  [space] step  [p]ause  [r]estart  [+/-] speed  [q]uit");
+		viz_color(COL_RESET);
+	}
+
+	viz_cursor_move(3 + GRID_H + (wide ? 7 : 8), 1);
+	fflush(stdout);
+}
+
 static void run_demo_rot(Config *cfg) {
 	int nsteps = cfg->nsteps;
 	float dt = cfg->dt;
