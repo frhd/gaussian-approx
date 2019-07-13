@@ -1617,11 +1617,23 @@ static void render_frame_rot(Grid *g, Config *cfg, int step, int nsteps,
 }
 
 static void run_demo_rot(Config *cfg) {
+	int i;
 	int nsteps = cfg->nsteps;
 	float dt = cfg->dt;
 	int L = cfg->L;
+	float err_sum = 0;
+	int speed;
+	struct timeval t_start, t_now;
+
+	/* true state: [pos(3), rot(3), angvel(3), linvel(3)] = 12 elements */
+	float true_pos[3] = {0, 0, 0};
+	float true_rot[3] = {0, 0, 0};
+	float true_angvel[3] = {0, 0, 0.3};  /* slow z rotation */
+	float true_linvel[3] = {0.5, 0.2, 0};
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
+	Grid g;
+	float xmin = -10, xmax = 20, ymin = -10, ymax = 10;
 
 	if (nsteps <= 0) {
 		printf("nothing to do (nsteps=0)\n");
@@ -1678,79 +1690,133 @@ static void run_demo_rot(Config *cfg) {
 	m_opt = gaussianApprox(L);
 	y = newMatrix(3, 1);
 
-	/* true state: [pos(3), rot(3), angvel(3), linvel(3)] = 12 elements */
-	{
-		int i;
-		float true_pos[3] = {0, 0, 0};
-		float true_rot[3] = {0, 0, 0};
-		float true_angvel[3] = {0, 0, 0.3};  /* slow z rotation */
-		float true_linvel[3] = {0.5, 0.2, 0};
-		float err_sum = 0;
+	speed = cfg->speed;
 
-		for (i = 0; i < nsteps; i++) {
-			/* propagate true state */
-			true_pos[0] += true_linvel[0] * dt + 0.01 * randn();
-			true_pos[1] += true_linvel[1] * dt + 0.01 * randn();
-			true_pos[2] += 0.01 * randn();  /* slight z wobble */
+	gettimeofday(&t_start, NULL);
 
-			/* rotation: add angular velocity * dt + noise */
-			true_rot[0] += (true_angvel[0] + 0.05 * randn()) * dt;
-			true_rot[1] += (true_angvel[1] + 0.05 * randn()) * dt;
-			true_rot[2] += (true_angvel[2]) * dt;
+	for (i = 0; i < nsteps; i++) {
+		float est_pos[3], est_rot[3];
+		float pos_err, rot_err, elapsed, rmse;
 
-			/* slight wobble on x angular velocity */
-			true_angvel[0] = 0.1 * sin(0.02 * i);
+		/* propagate true state */
+		true_pos[0] += true_linvel[0] * dt + 0.01 * randn();
+		true_pos[1] += true_linvel[1] * dt + 0.01 * randn();
+		true_pos[2] += 0.01 * randn();  /* slight z wobble */
 
-			/* generate noisy position measurement */
-			setElem(y, 0, 0, true_pos[0] + 2.0 * randn());
-			setElem(y, 1, 0, true_pos[1] + 2.0 * randn());
-			setElem(y, 2, 0, true_pos[2] + 2.0 * randn());
+		/* rotation: add angular velocity * dt + noise */
+		true_rot[0] += (true_angvel[0] + 0.05 * randn()) * dt;
+		true_rot[1] += (true_angvel[1] + 0.05 * randn()) * dt;
+		true_rot[2] += (true_angvel[2]) * dt;
 
-			/* predict using decomp (rotation-aware) */
-			gaussianEstimator_Pred_decomp(&xEst, &CEst, NULL, &Cw, &dt, &m_opt);
+		/* slight wobble on x angular velocity */
+		true_angvel[0] = 0.1 * sin(0.02 * i);
 
-			/* update with position measurement */
-			gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_3d, &m_opt);
+		/* generate noisy position measurement */
+		setElem(y, 0, 0, true_pos[0] + 2.0 * randn());
+		setElem(y, 1, 0, true_pos[1] + 2.0 * randn());
+		setElem(y, 2, 0, true_pos[2] + 2.0 * randn());
 
-			/* extract estimates */
-			{
-				float est_pos[3], est_rot[3];
-				float pos_err, rot_err;
+		/* predict using decomp (rotation-aware) */
+		gaussianEstimator_Pred_decomp(&xEst, &CEst, NULL, &Cw, &dt, &m_opt);
 
-				est_pos[0] = elem(xEst, 0, 0);
-				est_pos[1] = elem(xEst, 1, 0);
-				est_pos[2] = elem(xEst, 2, 0);
-				est_rot[0] = elem(xEst, 3, 0);
-				est_rot[1] = elem(xEst, 4, 0);
-				est_rot[2] = elem(xEst, 5, 0);
+		/* update with position measurement */
+		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_3d, &m_opt);
 
-				pos_err = sqrt((est_pos[0] - true_pos[0]) * (est_pos[0] - true_pos[0]) +
-				               (est_pos[1] - true_pos[1]) * (est_pos[1] - true_pos[1]) +
-				               (est_pos[2] - true_pos[2]) * (est_pos[2] - true_pos[2]));
+		/* extract estimates */
+		est_pos[0] = elem(xEst, 0, 0);
+		est_pos[1] = elem(xEst, 1, 0);
+		est_pos[2] = elem(xEst, 2, 0);
+		est_rot[0] = elem(xEst, 3, 0);
+		est_rot[1] = elem(xEst, 4, 0);
+		est_rot[2] = elem(xEst, 5, 0);
 
-				{
-					float dr[3];
-					dr[0] = est_rot[0] - true_rot[0];
-					dr[1] = est_rot[1] - true_rot[1];
-					dr[2] = est_rot[2] - true_rot[2];
-					rot_err = sqrt(dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2]);
-				}
+		/* position error */
+		pos_err = sqrt((est_pos[0] - true_pos[0]) * (est_pos[0] - true_pos[0]) +
+		               (est_pos[1] - true_pos[1]) * (est_pos[1] - true_pos[1]) +
+		               (est_pos[2] - true_pos[2]) * (est_pos[2] - true_pos[2]));
 
-				err_sum += pos_err;
-			}
-		}
-
+		/* rotation error: angle between rotation vectors */
 		{
-			float final_rmse = err_sum / (nsteps > 0 ? nsteps : 1);
-			printf("rotation demo: %d steps, dt=%.2f, L=%d\n", nsteps, dt, L);
-			printf("avg pos RMSE: %.3f\n", final_rmse);
-			printf("final pos estimate: (%.2f, %.2f, %.2f)\n",
-				elem(xEst, 0, 0), elem(xEst, 1, 0), elem(xEst, 2, 0));
-			printf("final rot estimate: (%.3f, %.3f, %.3f)\n",
-				elem(xEst, 3, 0), elem(xEst, 4, 0), elem(xEst, 5, 0));
-			printf("true rot: (%.3f, %.3f, %.3f)\n",
-				true_rot[0], true_rot[1], true_rot[2]);
+			float dr[3];
+			dr[0] = est_rot[0] - true_rot[0];
+			dr[1] = est_rot[1] - true_rot[1];
+			dr[2] = est_rot[2] - true_rot[2];
+			rot_err = sqrt(dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2]);
 		}
+
+		err_sum += pos_err;
+		rmse = err_sum / (i + 1);
+
+		if (!cfg->quiet) {
+			float px_true, py_true, px_est, py_est;
+
+			viz_grid_init(&g, xmin, xmax, ymin, ymax);
+
+			/* draw true axes (green-ish) */
+			{
+				float proj_cx, proj_cy;
+				viz_project_3d(true_pos[0], true_pos[1], true_pos[2],
+					&proj_cx, &proj_cy);
+				proj_cx *= 2.0;
+				viz_grid_axes_3d(&g, proj_cx, proj_cy, true_rot);
+			}
+
+			/* draw position trail */
+			{
+				/* just plot current true + estimated positions */
+				viz_project_3d(true_pos[0], true_pos[1], true_pos[2],
+					&px_true, &py_true);
+				px_true *= 2.0;
+				viz_grid_point(&g, px_true, py_true, '.');
+
+				viz_project_3d(est_pos[0], est_pos[1], est_pos[2],
+					&px_est, &py_est);
+				px_est *= 2.0;
+				viz_grid_point(&g, px_est, py_est, '+');
+			}
+
+			/* draw estimated axes in different shade */
+			{
+				float proj_cx, proj_cy;
+				viz_project_3d(est_pos[0], est_pos[1], est_pos[2],
+					&proj_cx, &proj_cy);
+				proj_cx *= 2.0;
+				viz_grid_axes_3d(&g, proj_cx, proj_cy, est_rot);
+			}
+
+			/* measurement marker */
+			{
+				float mx, my;
+				viz_project_3d(elem(y, 0, 0), elem(y, 1, 0), elem(y, 2, 0),
+					&mx, &my);
+				mx *= 2.0;
+				viz_grid_point(&g, mx, my, 'o');
+			}
+
+			gettimeofday(&t_now, NULL);
+			elapsed = (t_now.tv_sec - t_start.tv_sec) +
+				(t_now.tv_usec - t_start.tv_usec) / 1e6;
+
+			render_frame_rot(&g, cfg, i, nsteps,
+				true_rot, est_rot, rot_err, pos_err, rmse,
+				0, elapsed);
+
+			usleep(speed * 1000);
+		}
+	}
+
+	/* summary */
+	{
+		float final_rmse = err_sum / (i > 0 ? i : 1);
+		printf("\n--- rotation demo summary ---\n");
+		printf("steps: %d\n", i);
+		printf("avg pos RMSE: %.3f\n", final_rmse);
+		printf("final pos estimate: (%.2f, %.2f, %.2f)\n",
+			elem(xEst, 0, 0), elem(xEst, 1, 0), elem(xEst, 2, 0));
+		printf("final rot estimate: (%.3f, %.3f, %.3f)\n",
+			elem(xEst, 3, 0), elem(xEst, 4, 0), elem(xEst, 5, 0));
+		printf("true rot: (%.3f, %.3f, %.3f)\n",
+			true_rot[0], true_rot[1], true_rot[2]);
 	}
 
 	freeMatrix(xEst);
@@ -1760,6 +1826,7 @@ static void run_demo_rot(Config *cfg) {
 	freeMatrix(m_opt);
 	freeMatrix(y);
 }
+
 
 static void run_grid_demo(void) {
 	int k, npts = 50;
