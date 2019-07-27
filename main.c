@@ -1633,7 +1633,7 @@ static void run_demo_rot(Config *cfg) {
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Grid g;
-	float xmin = -10, xmax = 20, ymin = -10, ymax = 10;
+	float xmin, xmax, ymin, ymax;
 
 	if (nsteps <= 0) {
 		printf("nothing to do (nsteps=0)\n");
@@ -1691,6 +1691,27 @@ static void run_demo_rot(Config *cfg) {
 	y = newMatrix(3, 1);
 
 	speed = cfg->speed;
+
+	/* pre-compute trajectory for bounds */
+	{
+		float px = 0, py = 0, pz = 0;
+		xmin = xmax = 0;
+		ymin = ymax = 0;
+		for (i = 0; i < nsteps; i++) {
+			float ppx, ppy;
+			px += true_linvel[0] * dt;
+			py += true_linvel[1] * dt;
+			pz += 0;  /* no z drift */
+			viz_project_3d(px, py, pz, &ppx, &ppy);
+			ppx *= 2.0;
+			if (ppx - 5 < xmin) xmin = ppx - 5;
+			if (ppx + 5 > xmax) xmax = ppx + 5;
+			if (ppy - 4 < ymin) ymin = ppy - 4;
+			if (ppy + 4 > ymax) ymax = ppy + 4;
+		}
+	}
+	if (xmax - xmin < 10) { xmin -= 5; xmax += 5; }
+	if (ymax - ymin < 8) { ymin -= 4; ymax += 4; }
 
 	gettimeofday(&t_start, NULL);
 
