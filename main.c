@@ -1622,8 +1622,9 @@ static void run_demo_rot(Config *cfg) {
 	float dt = cfg->dt;
 	int L = cfg->L;
 	float err_sum = 0;
-	int speed;
+	int paused, speed;
 	struct timeval t_start, t_now;
+	int action = 0;
 
 	/* true state: [pos(3), rot(3), angvel(3), linvel(3)] = 12 elements */
 	float true_pos[3] = {0, 0, 0};
@@ -1691,6 +1692,10 @@ static void run_demo_rot(Config *cfg) {
 	y = newMatrix(3, 1);
 
 	speed = cfg->speed;
+	paused = cfg->interactive;
+
+	if (!cfg->quiet && cfg->interactive)
+		term_raw_mode();
 
 	/* pre-compute trajectory for bounds */
 	{
@@ -1715,9 +1720,29 @@ static void run_demo_rot(Config *cfg) {
 
 	gettimeofday(&t_start, NULL);
 
-	for (i = 0; i < nsteps; i++) {
+restart_rot:
+	action = 0;
+	err_sum = 0;
+
+	for (i = 0; i < nsteps; ) {
 		float est_pos[3], est_rot[3];
 		float pos_err, rot_err, elapsed, rmse;
+		int ret;
+
+		if (!cfg->quiet && cfg->interactive) {
+			while (paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) { action = -1; goto end_rot; }
+				if (ret == -2) { action = -2; goto end_rot; }
+				if (ret == 1) break;
+				usleep(20000);
+			}
+			if (!paused) {
+				ret = handle_input(&paused, &speed);
+				if (ret == -1) { action = -1; goto end_rot; }
+				if (ret == -2) { action = -2; goto end_rot; }
+			}
+		}
 
 		/* propagate true state */
 		true_pos[0] += true_linvel[0] * dt + 0.01 * randn();
@@ -1820,11 +1845,17 @@ static void run_demo_rot(Config *cfg) {
 
 			render_frame_rot(&g, cfg, i, nsteps,
 				true_rot, est_rot, rot_err, pos_err, rmse,
-				0, elapsed);
+				paused, elapsed);
 
 			usleep(speed * 1000);
 		}
+
+		i++;
 	}
+
+end_rot:
+	if (!cfg->quiet && cfg->interactive)
+		term_restore();
 
 	/* summary */
 	{
@@ -1840,6 +1871,29 @@ static void run_demo_rot(Config *cfg) {
 			true_rot[0], true_rot[1], true_rot[2]);
 	}
 
+	if (action == -2) {
+		srand(time(NULL));
+		true_pos[0] = true_pos[1] = true_pos[2] = 0;
+		true_rot[0] = true_rot[1] = true_rot[2] = 0;
+		freeMatrix(xEst);
+		freeMatrix(CEst);
+		xEst = zeroMatrix(12, 1);
+		CEst = zeroMatrix(12, 12);
+		setElem(CEst, 0, 0, 5.0);
+		setElem(CEst, 1, 1, 5.0);
+		setElem(CEst, 2, 2, 5.0);
+		setElem(CEst, 3, 3, 1.0);
+		setElem(CEst, 4, 4, 1.0);
+		setElem(CEst, 5, 5, 1.0);
+		setElem(CEst, 6, 6, 0.5);
+		setElem(CEst, 7, 7, 0.5);
+		setElem(CEst, 8, 8, 0.5);
+		setElem(CEst, 9, 9, 2.0);
+		setElem(CEst, 10, 10, 2.0);
+		setElem(CEst, 11, 11, 2.0);
+		goto restart_rot;
+	}
+
 	freeMatrix(xEst);
 	freeMatrix(CEst);
 	freeMatrix(Cw);
@@ -1847,6 +1901,7 @@ static void run_demo_rot(Config *cfg) {
 	freeMatrix(m_opt);
 	freeMatrix(y);
 }
+
 
 
 static void run_grid_demo(void) {
