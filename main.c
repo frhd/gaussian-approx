@@ -40,7 +40,7 @@ typedef struct {
 
 static void print_usage(const char *prog) {
 	printf("usage: %s [options]\n", prog);
-	printf("  -m <mode>   demo mode: 2d, 1d, multi, test, grid (default: 2d)\n");
+	printf("  -m <mode>   demo mode: 2d, 1d, multi, rot, test, grid (default: 2d)\n");
 	printf("  -t <traj>   trajectory: circle, line, fig8, random (default: circle)\n");
 	printf("  -n <steps>  number of steps                 (default: 100)\n");
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
