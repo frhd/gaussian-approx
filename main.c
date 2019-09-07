@@ -1858,7 +1858,7 @@ end_rot:
 		term_restore();
 
 	/* summary */
-	{
+	if (action == 0) {
 		float final_rmse = err_sum / (i > 0 ? i : 1);
 		printf("\n--- rotation demo summary ---\n");
 		printf("steps: %d\n", i);
@@ -1869,6 +1869,8 @@ end_rot:
 			elem(xEst, 3, 0), elem(xEst, 4, 0), elem(xEst, 5, 0));
 		printf("true rot: (%.3f, %.3f, %.3f)\n",
 			true_rot[0], true_rot[1], true_rot[2]);
+	} else {
+		printf("\nstopped at step %d/%d\n", i, nsteps);
 	}
 
 	if (action == -2) {
