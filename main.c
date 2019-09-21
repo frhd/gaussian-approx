@@ -122,7 +122,6 @@ Matrix hfun_2d(Matrix m) {
 	return out;
 }
 
-
 /* observe 3d position from 12-state: extract rows 0-2 */
 Matrix hfun_3d(Matrix m) {
 	int j;
@@ -1718,6 +1717,14 @@ static void run_demo_rot(Config *cfg) {
 	if (xmax - xmin < 10) { xmin -= 5; xmax += 5; }
 	if (ymax - ymin < 8) { ymin -= 4; ymax += 4; }
 
+	if (!cfg->quiet) {
+		viz_clear_screen();
+		printf("3D rotation tracking demo\n");
+		printf("12-state: [pos, rot, angvel, linvel]\n");
+		printf("dt=%.2f, L=%d, nsteps=%d\n\n", dt, L, nsteps);
+		usleep(1500000);
+	}
+
 	gettimeofday(&t_start, NULL);
 
 restart_rot:
@@ -1903,8 +1910,6 @@ end_rot:
 	freeMatrix(m_opt);
 	freeMatrix(y);
 }
-
-
 
 static void run_grid_demo(void) {
 	int k, npts = 50;
@@ -2101,11 +2106,11 @@ int main(int argc, char *argv[]) {
 	case MODE_1D:
 		run_demo(&cfg);
 		break;
-	case MODE_ROT:
-		run_demo_rot(&cfg);
-		break;
 	case MODE_MULTI:
 		run_demo_multi(&cfg);
+		break;
+	case MODE_ROT:
+		run_demo_rot(&cfg);
 		break;
 	case MODE_2D:
 	default:

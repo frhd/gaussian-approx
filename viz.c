@@ -479,6 +479,13 @@ void viz_panel_text(Panel *p, int line, const char *text) {
 	printf("%-*.*s", maxw, maxw, text);
 }
 
+/* simple orthographic 3d -> 2d projection
+ * isometric-ish: px = x + 0.5*z, py = y + 0.3*z */
+void viz_project_3d(float x, float y, float z, float *px, float *py) {
+	*px = x + 0.5 * z;
+	*py = y + 0.3 * z;
+}
+
 /* Rodrigues rotation: R = I + sin(t)/t * K + (1-cos(t))/t^2 * K^2
  * where K is skew-symmetric of rotation vector, t = |rot| */
 static void rodrigues(float rot[3], float R[3][3]) {
@@ -512,13 +519,6 @@ static void rodrigues(float rot[3], float R[3][3]) {
 			for (j = 0; j < 3; j++)
 				R[i][j] = (i == j ? 1.0 : 0.0) + s * K[i][j] + c * K2[i][j];
 	}
-}
-
-/* simple orthographic 3d -> 2d projection
- * isometric-ish: px = x + 0.5*z, py = y + 0.3*z */
-void viz_project_3d(float x, float y, float z, float *px, float *py) {
-	*px = x + 0.5 * z;
-	*py = y + 0.3 * z;
 }
 
 /* draw rotated 3d axes on grid using rotation vector */
