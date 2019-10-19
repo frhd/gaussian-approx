@@ -150,9 +150,148 @@ void viz_sigma_points_1d(float mean, float sigma, Matrix m_opt, int width) {
 	printf("(%d sigma points)\n", npts);
 }
 
+void viz_sigma_weights(Matrix m_opt) {
+	int i, npts;
+	int L;
+
+	if (!m_opt) {
+		printf("Sigma points: (null)\n");
+		return;
+	}
+
+	npts = m_opt->width;
+	L = npts + 1;
+
+	viz_color(COL_CYAN);
+	printf("Sigma points (L=%d, N=%d points):\n", L, npts);
+	viz_color(COL_RESET);
+
+	for (i = 0; i < npts; i++) {
+		printf("  [%2d] % .6f\n", i, elem(m_opt, 0, i));
+	}
+
+	viz_color(COL_DIM);
+	printf("  (L inferred from m_opt width: %d = %d - 1 sigma positions)\n", L, npts + 1);
+	viz_color(COL_RESET);
+}
+
+void viz_sigma_points_2d(Grid *g, Matrix xEst, Matrix CEst, Matrix m_opt, int post_transform) {
+	int i, npts;
+	Matrix A, Vec, Val, Sigma;
+	float cx, cy;
+
+	if (!xEst || !CEst || !m_opt)
+		return;
+
+	/* extract 2D mean position */
+	cx = elem(xEst, 0, 0);
+	cy = elem(xEst, 1, 0);
+
+	/* extract and eigendecompose 2x2 covariance */
+	A = newMatrix(2, 2);
+	setElem(A, 0, 0, elem(CEst, 0, 0));
+	setElem(A, 0, 1, elem(CEst, 0, 1));
+	setElem(A, 1, 0, elem(CEst, 1, 0));
+	setElem(A, 1, 1, elem(CEst, 1, 1));
+
+	Vec = newMatrix(2, 2);
+	Val = newMatrix(2, 2);
+	eig(&A, &Vec, &Val);
+
+	/* check for singular covariance */
+	if (elem(Val, 0, 0) <= 0 || elem(Val, 1, 1) <= 0) {
+		freeMatrix(A);
+		freeMatrix(Vec);
+		freeMatrix(Val);
+		return;
+	}
+
+	/* compute Sigma = Vec * sqrt(Val) */
+	Sigma = newMatrix(2, 2);
+	for (i = 0; i < 2; i++) {
+		for (int j = 0; j < 2; j++) {
+			float sum = 0;
+			for (int k = 0; k < 2; k++)
+				sum += elem(Vec, i, k) * sqrt(elem(Val, k, k));
+			setElem(Sigma, i, j, sum);
+		}
+	}
+
+	/* iterate over sigma point offsets in m_opt */
+	npts = m_opt->width;
+	for (i = 0; i < npts; i++) {
+		float offset_x, offset_y;
+		float sp_x, sp_y;
+		int gx, gy;
+		char sp_char = post_transform ? '*' : '.';
+		char line_char = '-';
+
+		/* compute scaled offset: Sigma * m_opt[i] */
+		for (int j = 0; j < 2; j++) {
+			float val = 0;
+			float m_val = elem(m_opt, 0, i);
+			val = elem(Sigma, j, 0) * m_val + elem(Sigma, j, 1) * m_val;
+			if (j == 0)
+				offset_x = val;
+			else
+				offset_y = val;
+		}
+
+		/* sigma point position: xEst + offset (2D only) */
+		sp_x = cx + offset_x;
+		sp_y = cy + offset_y;
+
+		/* map to grid coordinates */
+		gx = viz_grid_map_x(g, sp_x);
+		gy = viz_grid_map_y(g, sp_y);
+
+		/* only plot if inside grid bounds */
+		if (gx >= 1 && gx < GRID_W - 1 && gy >= 1 && gy < GRID_H - 1) {
+			/* draw line from mean to sigma point */
+			int nsteps = 10;
+			for (int k = 0; k <= nsteps; k++) {
+				float t = (float)k / nsteps;
+				float lx = cx + (sp_x - cx) * t;
+				float ly = cy + (sp_y - cy) * t;
+				int lxc = viz_grid_map_x(g, lx);
+				int lyc = viz_grid_map_y(g, ly);
+
+				if (lxc >= 1 && lxc < GRID_W - 1 && lyc >= 1 && lyc < GRID_H - 1) {
+					if (g->cells[lyc][lxc] == ' ')
+						g->cells[lyc][lxc] = line_char;
+				}
+			}
+
+			/* place sigma point marker (last to be on top of line) */
+			g->cells[gy][gx] = sp_char;
+		}
+	}
+
+	freeMatrix(A);
+	freeMatrix(Vec);
+	freeMatrix(Val);
+	freeMatrix(Sigma);
+}
+
 /* color a grid cell based on its character */
 static void viz_grid_putchar(char ch, int r, int c) {
-	if (ch == '.') {
+	/* check for sigma point markers */
+	int is_sigma_dot = (ch == '.' && !(r == 0 || r == GRID_H - 1 || c == 0 || c == GRID_W - 1));
+	int is_sigma_star = (ch == '*');
+
+	if (is_sigma_dot) {
+		/* pre-transform sigma point: red, dim */
+		viz_color(COL_RED);
+		viz_color(COL_DIM);
+		putchar('.');
+		viz_color(COL_RESET);
+	} else if (is_sigma_star) {
+		/* post-transform sigma point: yellow, dim */
+		viz_color(COL_YELLOW);
+		viz_color(COL_DIM);
+		putchar('*');
+		viz_color(COL_RESET);
+	} else if (ch == '.') {
 		viz_color(COL_GREEN);
 		putchar(ch);
 		viz_color(COL_RESET);
