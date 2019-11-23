@@ -19,6 +19,7 @@
 #define MODE_1D    1
 #define MODE_TEST  2
 #define MODE_GRID  3
+#define MODE_COMPARE 6
 #define MODE_MULTI 4
 #define MODE_ROT   5
 
@@ -36,11 +37,12 @@ typedef struct {
 	int loop;
 	char *outfile;
 	int ntargets;
+	int verbose;
 } Config;
 
 static void print_usage(const char *prog) {
 	printf("usage: %s [options]\n", prog);
-	printf("  -m <mode>   demo mode: 2d, 1d, multi, rot, test, grid (default: 2d)\n");
+	printf("  -m <mode>   demo mode: 2d, 1d, multi, rot, test, grid, compare (default: 2d)\n");
 	printf("  -t <traj>   trajectory: circle, line, fig8, random (default: circle)\n");
 	printf("  -n <steps>  number of steps                 (default: 100)\n");
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
@@ -50,6 +52,7 @@ static void print_usage(const char *prog) {
 	printf("  -o <file>   export data to CSV file\n");
 	printf("  -q          quiet mode (final result only)\n");
 	printf("  -i          interactive mode (step with keyboard)\n");
+	printf("  -v          verbose mode (show sigma points)\n");
 	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  --loop      auto-restart with new seed when done\n");
@@ -1615,6 +1618,133 @@ static void render_frame_rot(Grid *g, Config *cfg, int step, int nsteps,
 	fflush(stdout);
 }
 
+
+/* compare mode: compare L=3, L=5, L=7 approximation levels */
+static void run_demo_compare(Config *cfg) {
+	int levels[] = {3, 5, 7};
+	int i;
+	float dt = cfg->dt;
+	int nsteps = cfg->nsteps;
+	float err_sum[3] = {0, 0, 0};
+
+	printf("\n========================================\n");
+	printf("   Approximation Level Comparison\n");
+	printf("========================================\n\n");
+	printf("trajectory: %s\n", sim_trajectory_name(cfg->trajectory));
+	printf("steps: %d, dt: %.2f\n\n", nsteps, dt);
+
+	/* run filter for each L value with same scenario */
+	for (i = 0; i < 3; i++) {
+		int L = levels[i];
+		int step;
+		Matrix xEst, CEst, Cw, Cv, m_opt, y;
+		Matrix true_pos, meas;
+		float err_sum_i = 0;
+
+		/* generate scenario once and reuse */
+		if (i == 0) {
+			Scenario *scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
+			true_pos = scen->true_pos;
+			meas = scen->measurements;
+		} else {
+			/* re-use same trajectory with new seed */
+			Scenario *scen = sim_create_scenario(cfg->trajectory, nsteps, dt, 2.0);
+			true_pos = scen->true_pos;
+			meas = scen->measurements;
+		}
+
+		/* initial state estimate */
+		xEst = zeroMatrix(6, 1);
+		setElem(xEst, 0, 0, elem(true_pos, 0, 0));
+		setElem(xEst, 1, 0, elem(true_pos, 0, 1));
+		setElem(xEst, 2, 0, 0.0);
+		setElem(xEst, 3, 0, 0.5);
+
+		/* initial covariance */
+		CEst = zeroMatrix(6, 6);
+		setElem(CEst, 0, 0, 10.0);
+		setElem(CEst, 1, 1, 10.0);
+		setElem(CEst, 2, 2, 5.0);
+		setElem(CEst, 3, 3, 5.0);
+		setElem(CEst, 4, 4, 0.001);
+		setElem(CEst, 5, 5, 0.001);
+
+		/* process noise */
+		Cw = zeroMatrix(6, 6);
+		setElem(Cw, 0, 0, 0.01);
+		setElem(Cw, 1, 1, 0.01);
+		setElem(Cw, 2, 2, 0.1);
+		setElem(Cw, 3, 3, 0.1);
+		setElem(Cw, 4, 4, 0.001);
+		setElem(Cw, 5, 5, 0.001);
+
+		/* measurement noise */
+		Cv = zeroMatrix(2, 2);
+		setElem(Cv, 0, 0, 4.0);
+		setElem(Cv, 1, 1, 4.0);
+
+		m_opt = gaussianApprox(L);
+		y = newMatrix(2, 1);
+
+		/* filter loop */
+		for (step = 0; step < nsteps; step++) {
+			float est_x, est_y, true_x, true_y, err;
+
+			/* measurement */
+			setElem(y, 0, 0, elem(meas, step, 0));
+			setElem(y, 1, 0, elem(meas, step, 1));
+
+			/* predict */
+			gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_2d, &dt, &m_opt);
+
+			/* update */
+			gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_2d, &m_opt);
+
+			/* compute error */
+			est_x = elem(xEst, 0, 0);
+			est_y = elem(xEst, 1, 0);
+			true_x = elem(true_pos, step, 0);
+			true_y = elem(true_pos, step, 1);
+			err = sqrt((est_x - true_x) * (est_x - true_x) +
+			           (est_y - true_y) * (est_y - true_y));
+			err_sum_i += err;
+		}
+
+		freeMatrix(xEst);
+		freeMatrix(CEst);
+		freeMatrix(Cw);
+		freeMatrix(Cv);
+		freeMatrix(m_opt);
+		freeMatrix(y);
+		
+		err_sum[i] = err_sum_i;
+	}
+
+	/* print comparison results */
+	printf("\nL=3 (2 points): RMSE=%.4f\n", err_sum[0] / nsteps);
+	printf("L=5 (4 points): RMSE=%.4f\n", err_sum[1] / nsteps);
+	printf("L=7 (6 points): RMSE=%.4f\n\n", err_sum[2] / nsteps);
+
+	printf("\n----------------------------------------\n");
+
+	/* find best */
+	{
+		float best_err = err_sum[0] / nsteps;
+		int best_i = 0;
+		for (i = 1; i < 3; i++) {
+			float rmse = err_sum[i] / nsteps;
+			if (rmse < best_err) {
+				best_err = rmse;
+				best_i = i;
+			}
+		}
+		printf("recommendation: L=%d gives best accuracy (RMSE=%.4f)\n",
+		       levels[best_i], best_err);
+	}
+	printf("========================================\n");
+}
+
+
 static void run_demo_rot(Config *cfg) {
 	int i;
 	int nsteps = cfg->nsteps;
@@ -1955,7 +2085,7 @@ static int parse_mode(const char *s) {
 	if (strcmp(s, "multi") == 0) return MODE_MULTI;
 	if (strcmp(s, "rot") == 0) return MODE_ROT;
 	if (strcmp(s, "test") == 0) return MODE_TEST;
-	if (strcmp(s, "grid") == 0) return MODE_GRID;
+	if (strcmp(s, "compare") == 0) return MODE_COMPARE;
 	return -1;
 }
 
@@ -1977,6 +2107,7 @@ int main(int argc, char *argv[]) {
 	cfg.loop = 0;
 	cfg.outfile = NULL;
 	cfg.ntargets = 2;
+	cfg.verbose = 0;
 
 	/* check for gnu-style long options before getopt */
 	for (i = 1; i < argc; i++) {
@@ -1999,7 +2130,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:o:k:qih")) != -1) {
+	while ((opt = getopt(argc, argv, "m:t:n:d:L:s:o:k:qivh")) != -1) {
 		switch (opt) {
 		case 'm':
 			cfg.mode = parse_mode(optarg);
@@ -2053,6 +2184,9 @@ int main(int argc, char *argv[]) {
 		case 'i':
 			cfg.interactive = 1;
 			break;
+		case 'v':
+			cfg.verbose = 1;
+			break;
 		case 'h':
 			print_usage(argv[0]);
 			return 0;
@@ -2080,7 +2214,7 @@ int main(int argc, char *argv[]) {
 
 	/* print config summary */
 	if (!cfg.quiet) {
-		const char *mnames[] = {"2d", "1d", "test", "grid", "multi", "rot"};
+		const char *mnames[] = {"2d", "1d", "test", "grid", "multi", "rot", "compare"};
 		printf("vizga: mode=%s traj=%s steps=%d dt=%.2f L=%d seed=%s color=%s%s speed=%dms%s%s%s",
 			mnames[cfg.mode], sim_trajectory_name(cfg.trajectory),
 			cfg.nsteps, cfg.dt, cfg.L,
@@ -2111,6 +2245,9 @@ int main(int argc, char *argv[]) {
 		break;
 	case MODE_ROT:
 		run_demo_rot(&cfg);
+		break;
+	case MODE_COMPARE:
+		run_demo_compare(&cfg);
 		break;
 	case MODE_2D:
 	default:
