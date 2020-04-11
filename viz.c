@@ -571,6 +571,63 @@ void viz_progress_bar(int step, int total, int width) {
 	printf("] %d/%d", step + 1, total);
 }
 
+/* draw sparkline using unicode block characters
+ * values: array of float values
+ * count: number of values
+ * width: number of characters to render
+ * uses ▁▂▃▄▅▆▇█ for 8 levels
+ */
+void viz_sparkline(float *values, int count, int width) {
+	int i, idx;
+	float vmin, vmax, range;
+	const char *blocks = " \316\261\316\262\316\263\316\264\316\265\316\266\316\267\316\210"; /* UTF-8 for space + 8 blocks */
+	int nblocks = 9;
+
+	if (count <= 0 || width <= 0) return;
+
+	/* find min/max */
+	vmin = vmax = values[0];
+	for (i = 1; i < count; i++) {
+		if (values[i] < vmin) vmin = values[i];
+		if (values[i] > vmax) vmax = values[i];
+	}
+
+	range = vmax - vmin;
+	if (range < 0.0001) range = 1.0;
+
+	/* render - sample from values array */
+	for (i = 0; i < width; i++) {
+		float val;
+		int level;
+
+		/* pick value - scale index to count */
+		idx = (int)(i * count / width);
+		if (idx >= count) idx = count - 1;
+
+		val = values[idx];
+
+		/* map to 0-7 range */
+		level = (int)(((val - vmin) / range) * (nblocks - 1));
+		if (level < 0) level = 0;
+		if (level >= nblocks) level = nblocks - 1;
+
+		/* print character (skip leading space) */
+		if (i == 0 && level == 0 && count > 1) {
+			/* find first non-zero for better visual */
+			int first_nonzero = 0;
+			for (idx = 0; idx < count; idx++) {
+				if (values[idx] > vmin + 0.01 * range) {
+					first_nonzero = 1;
+					break;
+				}
+			}
+			if (first_nonzero && level == 0) level = 1;
+		}
+
+		printf("%c%c%c", blocks[level*3], blocks[level*3+1], blocks[level*3+2]);
+	}
+}
+
 void viz_cursor_move(int row, int col) {
 	printf("\033[%d;%dH", row, col);
 }
