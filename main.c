@@ -38,6 +38,7 @@ typedef struct {
 	char *outfile;
 	int ntargets;
 	int verbose;
+	int metrics;
 } Config;
 
 static void print_usage(const char *prog) {
@@ -56,6 +57,7 @@ static void print_usage(const char *prog) {
 	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  --loop      auto-restart with new seed when done\n");
+	printf("  --metrics   show convergence metrics (NIS, sparkline)\n");
 	printf("  -h          show this help\n");
 }
 
@@ -367,6 +369,34 @@ static void run_tests(void) {
 	printf("\nall tests done\n");
 }
 
+/* compute normalized innovation squared (NIS) for 2D filter
+ * NIS = innovation^T * inv(Cy) * innovation
+ * where Cy is the predicted measurement covariance */
+static float compute_nis_2d(float innov_x, float innov_y, Matrix Cy_pred) {
+	Matrix innov_vec, inv_cy, temp, nis_mat;
+	float nis;
+
+	/* innovation vector [innov_x; innov_y] */
+	innov_vec = newMatrix(2, 1);
+	setElem(innov_vec, 0, 0, innov_x);
+	setElem(innov_vec, 1, 0, innov_y);
+
+	/* inverse of predicted measurement covariance */
+	inv_cy = invertCovMatrix(Cy_pred);
+
+	/* nis = innov^T * inv(Cy) * innov */
+	temp = mulMatrix(inv_cy, innov_vec);
+	nis_mat = mulMatrix(transposeMatrix(innov_vec), temp);
+	nis = elem(nis_mat, 0, 0);
+
+	freeMatrix(innov_vec);
+	freeMatrix(inv_cy);
+	freeMatrix(temp);
+	freeMatrix(nis_mat);
+
+	return nis;
+}
+
 /* process keyboard input
  * returns: 1=advance step, 0=nothing, -1=quit, -2=restart, -3=next traj */
 static int handle_input(int *paused, int *speed) {
@@ -639,7 +669,8 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 	float est_x, float est_y, float vx, float vy,
 	float cov_xx, float cov_yy, float trace_p, float trace_p0,
 	float rmse, float err, float innov_x, float innov_y,
-	int paused, float elapsed) {
+	float nis, float nis_avg, int paused, float elapsed,
+	float *innov_hist, float *rmse_hist, int hist_idx) {
 	int wide = viz_term_width() >= 80;
 	Panel sp;
 	char buf[64];
@@ -673,7 +704,7 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 		sp.row = 3;
 		sp.col = 7 + GRID_W + 2;  /* after y-labels + grid + gap */
 		sp.width = 18;
-		sp.height = 16;
+		sp.height = 19;
 		viz_panel_border(&sp);
 
 		snprintf(buf, sizeof(buf), "  %s", sim_trajectory_name(cfg->trajectory));
@@ -711,6 +742,33 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 
 		snprintf(buf, sizeof(buf), " err:  %5.2f", err);
 		viz_panel_text(&sp, 13, buf);
+
+		/* NIS metrics display */
+		if (cfg->metrics) {
+			viz_cursor_move(sp.row + 1 + 14, sp.col + 1);
+			printf(" NIS: ");
+			if (nis < 2.0) viz_color(COL_GREEN);
+			else if (nis < 5.0) viz_color(COL_YELLOW);
+			else viz_color(COL_RED);
+			printf("%5.2f", nis);
+			viz_color(COL_RESET);
+			viz_cursor_move(sp.row + 1 + 15, sp.col + 1);
+			viz_color(COL_DIM);
+			printf(" avg: %5.2f", nis_avg);
+			viz_color(COL_RESET);
+
+			/* sparkline of innovation history */
+			if (hist_idx > 0) {
+				viz_cursor_move(sp.row + 1 + 16, sp.col + 1);
+				viz_sparkline(innov_hist, hist_idx, sp.width - 2);
+			}
+
+			/* sparkline of RMSE history */
+			if (hist_idx > 0) {
+				viz_cursor_move(sp.row + 1 + 17, sp.col + 1);
+				viz_sparkline(rmse_hist, hist_idx, sp.width - 2);
+			}
+		}
 	}
 
 	/* legend and extra info below grid */
@@ -764,6 +822,20 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 			viz_cursor_move(brow + 7, 1);
 			printf("  convergence: ");
 			viz_convergence_bar(trace_p, trace_p0, 20);
+
+			/* NIS metrics for narrow terminals */
+			if (cfg->metrics) {
+				viz_cursor_move(brow + 8, 1);
+				printf("  NIS: ");
+				if (nis < 2.0) viz_color(COL_GREEN);
+				else if (nis < 5.0) viz_color(COL_YELLOW);
+				else viz_color(COL_RED);
+				printf("%.3f", nis);
+				viz_color(COL_RESET);
+				viz_color(COL_DIM);
+				printf("  avg: %.3f", nis_avg);
+				viz_color(COL_RESET);
+			}
 		} else {
 			viz_cursor_move(brow + 4, 1);
 			printf("  innov: (%.3f, %.3f)  convergence: ", innov_x, innov_y);
@@ -780,7 +852,7 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 
 	/* controls help on first frame */
 	if (step == 0 && cfg->interactive) {
-		int hrow = 3 + GRID_H + (wide ? 8 : 11);
+		int hrow = 3 + GRID_H + (wide ? 8 : 11) + (cfg->metrics ? (wide ? 0 : 2) : 0);
 		viz_cursor_move(hrow, 1);
 		viz_color(COL_DIM);
 		printf("  [space] step  [p]ause  [r]estart  [n]ext  [+/-] speed  [q]uit");
@@ -788,7 +860,7 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 	}
 
 	/* move cursor to bottom so output doesn't mess up layout */
-	viz_cursor_move(3 + GRID_H + (wide ? 10 : 13), 1);
+	viz_cursor_move(3 + GRID_H + (wide ? 10 : 13) + (cfg->metrics ? (wide ? 0 : 2) : 0), 1);
 	fflush(stdout);
 }
 
@@ -810,6 +882,12 @@ static void run_demo_2d(Config *cfg) {
 	float innov_x = 0, innov_y = 0;
 	struct timeval t_start, t_now;
 	int action;  /* 0=normal end, -1=quit, -2=restart, -3=next */
+
+	/* metrics tracking */
+	float innov_hist[50] = {0};
+	float rmse_hist[50] = {0};
+	float nis, nis_sum = 0;
+	int innov_idx = 0, rmse_idx = 0;
 
 	Matrix xEst, CEst, Cw, Cv, m_opt, y;
 	Matrix true_pos, meas;
@@ -854,6 +932,15 @@ restart_2d:
 	err_max = 0;
 	innov_x = 0;
 	innov_y = 0;
+
+	/* initialize metrics */
+	nis_sum = 0;
+	innov_idx = 0;
+	rmse_idx = 0;
+	for (i = 0; i < 50; i++) {
+		innov_hist[i] = 0;
+		rmse_hist[i] = 0;
+	}
 
 	/* generate scenario */
 	scen = sim_create_scenario(traj_type, nsteps, dt, 2.0);
@@ -967,6 +1054,47 @@ restart_2d:
 		/* predict */
 		gaussianEstimator_Pred(&xEst, &CEst, NULL, &Cw, afun_2d, &dt, &m_opt);
 
+		/* compute NIS if metrics enabled */
+		nis = 0;
+		if (cfg->metrics) {
+			/* compute predicted measurement covariance: Cy = H * P * H^T + R
+			 * for position-only measurement, H = [I 0] (2x6) */
+			{
+				Matrix H, HP, HPT, Cy;
+				int r;
+
+				/* H = [I 0] 2x6 matrix */
+				H = zeroMatrix(2, 6);
+				for (r = 0; r < 2; r++)
+					setElem(H, r, r, 1.0);
+
+				/* HP = H * P */
+				HP = mulMatrix(H, CEst);
+
+				/* HPT = HP * H^T = H * P * H^T */
+				HPT = mulMatrix(HP, transposeMatrix(H));
+
+				/* Cy = H * P * H^T + R = HPT + Cv */
+				Cy = addMatrix(HPT, Cv);
+
+				/* compute NIS */
+				nis = compute_nis_2d(innov_x, innov_y, Cy);
+				nis_sum += nis;
+
+				/* save history (circular buffer) */
+				innov_hist[innov_idx] = sqrt(innov_x*innov_x + innov_y*innov_y);
+				rmse_hist[rmse_idx] = err_sum / (i + 1);
+				innov_idx = (innov_idx + 1) % 50;
+				rmse_idx = (rmse_idx + 1) % 50;
+
+				/* cleanup */
+				freeMatrix(H);
+				freeMatrix(HP);
+				freeMatrix(HPT);
+				freeMatrix(Cy);
+			}
+		}
+
 		/* update */
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_2d, &m_opt);
 
@@ -987,7 +1115,7 @@ restart_2d:
 				est_x, est_y,
 				elem(xEst, 2, 0), elem(xEst, 3, 0),
 				elem(CEst, 0, 0), elem(CEst, 1, 1),
-				err_sum / (i + 1));
+				err_sum / (i + 1), nis);
 		}
 
 		if (!cfg->quiet) {
@@ -1025,7 +1153,9 @@ restart_2d:
 				true_x, true_y, elem(meas, i, 0), elem(meas, i, 1),
 				est_x, est_y, elem(xEst, 2, 0), elem(xEst, 3, 0),
 				elem(CEst, 0, 0), elem(CEst, 1, 1), trace_p, trace_p0,
-				err_sum / (i + 1), err, innov_x, innov_y, paused, elapsed);
+				err_sum / (i + 1), err, innov_x, innov_y, nis,
+				nis_sum / (i + 1), paused, elapsed,
+				innov_hist, rmse_hist, innov_idx);
 
 			/* brief pause after measurement update for visual emphasis */
 			usleep(speed * 1000);
@@ -2108,6 +2238,7 @@ int main(int argc, char *argv[]) {
 	cfg.outfile = NULL;
 	cfg.ntargets = 2;
 	cfg.verbose = 0;
+	cfg.metrics = 0;
 
 	/* check for gnu-style long options before getopt */
 	for (i = 1; i < argc; i++) {
@@ -2124,6 +2255,11 @@ int main(int argc, char *argv[]) {
 			i--;
 		} else if (strcmp(argv[i], "--loop") == 0) {
 			cfg.loop = 1;
+			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
+			argc--;
+			i--;
+		} else if (strcmp(argv[i], "--metrics") == 0) {
+			cfg.metrics = 1;
 			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
 			argc--;
 			i--;
