@@ -1,3 +1,16 @@
+/* viz.c — ASCII terminal visualization for the Kalman filter demos
+ *
+ * Renders filter state as ASCII art: 1D bell curves, 2D grids with
+ * trajectories and covariance ellipses, progress bars, sparklines.
+ * Supports ANSI colors (auto-disabled when not a tty).
+ *
+ * Grid coordinates: world coords are mapped to character cells via
+ * viz_grid_map_x/y. Y is inverted because terminal row 0 is at top.
+ *
+ * Ellipse rendering uses eigendecomposition of the 2x2 position covariance
+ * to get semi-axes and rotation angle. X coordinates are scaled by 2.0
+ * to compensate for terminal character aspect ratio (~2:1 h:w).
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
