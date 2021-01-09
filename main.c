@@ -97,7 +97,9 @@ Matrix hfun_1d(Matrix m) {
 	return out;
 }
 
-/* 2d constant velocity: state = [x, y, vx, vy, 0, 0] */
+/* 2d constant velocity model: state = [x, y, vx, vy, 0, 0]
+ * F matrix is [[1,0,dt,0], [0,1,0,dt], [0,0,1,0], [0,0,0,1]]
+ * padded to 6d because gaussianEstimator_Est has hardcoded indices */
 Matrix afun_2d(Matrix m, float dt) {
 	int j;
 	Matrix out = newMatrix(m->height, m->width);
@@ -116,7 +118,7 @@ Matrix afun_2d(Matrix m, float dt) {
 	return out;
 }
 
-/* observe [x, y] from 6d state */
+/* observe position [x, y] from 6d state — H = [[1,0,0,0,0,0], [0,1,0,0,0,0]] */
 Matrix hfun_2d(Matrix m) {
 	int j;
 	Matrix out = newMatrix(2, m->width);
