@@ -1,3 +1,14 @@
+/* sim.c — simulation and scenario generation
+ *
+ * Provides trajectory generators for different motion patterns:
+ * - line: constant velocity with small process noise
+ * - circle: constant angular velocity around origin
+ * - figure8: lemniscate curve (tests filter on changing curvature)
+ * - random: drunkard's walk (tests filter agility)
+ *
+ * Also handles multi-target scenarios with position offsets and
+ * mixed trajectory types.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -16,6 +27,7 @@ float randn(void) {
 	return sqrt(-2.0 * log(u1)) * cos(2.0 * pi * u2);
 }
 
+/* trajectory generators — return nsteps x 2 matrix of [x, y] positions */
 Matrix sim_trajectory_line(int nsteps, float dt, float vx, float vy) {
 	int i;
 	float x = 0, y = 0;
