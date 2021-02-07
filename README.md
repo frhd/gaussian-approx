@@ -143,3 +143,11 @@ main.c           - CLI and demo dispatch
 - add measurement gating
 - handle non-square grids
 - add process noise adaptation
+
+## Controls (interactive mode)
+
+- space/enter — step forward
+- p — pause/resume
+- r — restart
+- n — next trajectory type (2d mode)
+- q — quit
