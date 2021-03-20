@@ -148,6 +148,6 @@ main.c           - CLI and demo dispatch
 
 ## TODO
 
-- add measurement gating
+- add measurement gating (maybe someday)
 - handle non-square grids
 - add process noise adaptation
