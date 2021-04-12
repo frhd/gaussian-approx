@@ -656,6 +656,19 @@ int viz_term_width(void) {
 	return 80;
 }
 
+int viz_term_height(void) {
+	struct winsize ws;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_row > 0)
+		return ws.ws_row;
+	return 24;
+}
+
+int viz_term_small(void) {
+	int w = viz_term_width();
+	int h = viz_term_height();
+	return (w < 80 || h < 24);
+}
+
 void viz_panel_border(Panel *p) {
 	int r, c;
 	/* top border */
