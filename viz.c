@@ -520,6 +520,20 @@ void viz_grid_ellipse(Grid *g, float cx, float cy, Matrix cov, char ch) {
 	a = 2.0 * sqrt(elem(Val, 0, 0));
 	b = 2.0 * sqrt(elem(Val, 1, 1));
 
+	/* handle sub-pixel ellipse: show as single dot at center */
+	if (a < 0.1 && b < 0.1) {
+		int gx = viz_grid_map_x(g, cx);
+		int gy = viz_grid_map_y(g, cy);
+		if (gx >= 1 && gx < GRID_W - 1 && gy >= 1 && gy < GRID_H - 1) {
+			if (g->cells[gy][gx] == ' ')
+				g->cells[gy][gx] = ch;
+		}
+		freeMatrix(A);
+		freeMatrix(Vec);
+		freeMatrix(Val);
+		return;
+	}
+
 	/* rotation angle from eigenvectors */
 	theta = atan2(elem(Vec, 1, 0), elem(Vec, 0, 0));
 
