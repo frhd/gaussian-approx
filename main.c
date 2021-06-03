@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/time.h>
 #include "matrix.h"
 #include "eig.h"
@@ -22,6 +23,13 @@
 #define MODE_COMPARE 6
 #define MODE_MULTI 4
 #define MODE_ROT   5
+
+static volatile sig_atomic_t sigint_received = 0;
+
+static void sigint_handler(int sig) {
+	(void)sig;
+	sigint_received = 1;
+}
 
 typedef struct {
 	int mode;
@@ -584,6 +592,12 @@ static void run_demo(Config *cfg) {
 		float est_pos, est_var, err, elapsed;
 		int ret;
 
+		/* check for sigint */
+		if (sigint_received) {
+			printf("\n");
+			goto done_1d;
+		}
+
 		if (!cfg->quiet && cfg->interactive) {
 			/* wait for input in interactive mode */
 			while (paused) {
@@ -1020,6 +1034,13 @@ restart_2d:
 		float est_x, est_y, true_x, true_y, err, elapsed;
 		float trace_p;
 		int ret;
+
+		/* check for sigint */
+		if (sigint_received) {
+			printf("\n");
+			action = -1;
+			goto end_loop_2d;
+		}
 
 		if (!cfg->quiet && cfg->interactive) {
 			while (paused) {
@@ -1487,6 +1508,13 @@ static void run_demo_multi(Config *cfg) {
 	for (i = 0; i < nsteps; ) {
 		float elapsed;
 		int ret;
+
+		/* check for sigint */
+		if (sigint_received) {
+			printf("\n");
+			action = -1;
+			goto end_multi;
+		}
 
 		if (!cfg->quiet && cfg->interactive) {
 			while (paused) {
@@ -1998,6 +2026,13 @@ restart_rot:
 		float pos_err, rot_err, elapsed, rmse;
 		int ret;
 
+		/* check for sigint */
+		if (sigint_received) {
+			printf("\n");
+			action = -1;
+			goto end_rot;
+		}
+
 		if (!cfg->quiet && cfg->interactive) {
 			while (paused) {
 				ret = handle_input(&paused, &speed);
@@ -2345,6 +2380,9 @@ int main(int argc, char *argv[]) {
 		srand(cfg.seed);
 	else
 		srand(time(NULL));
+
+	/* set up signal handler for graceful termination */
+	signal(SIGINT, sigint_handler);
 
 	/* disable colors if not a tty or --no-color given */
 	if (!cfg.color || !isatty(STDOUT_FILENO))
