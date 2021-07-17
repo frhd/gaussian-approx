@@ -77,6 +77,18 @@ static int parse_trajectory(const char *s) {
 	return -1;
 }
 
+/* check for nan/inf in state vector */
+static int state_is_valid(Matrix x) {
+	int i;
+	if (!x) return 0;
+	for (i = 0; i < x->height; i++) {
+		float v = elem(x, i, 0);
+		if (v != v || v == INFINITY || v == -INFINITY)
+			return 0;
+	}
+	return 1;
+}
+
 /* constant velocity in 6d state: [pos, vel, 0, 0, 0, 0]
  * padded to 6d because gaussianEstimator assumes it internally */
 Matrix afun_1d(Matrix m, float dt) {
@@ -634,6 +646,12 @@ static void run_demo(Config *cfg) {
 		/* update */
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_1d, &m_opt);
 
+		/* check for nan/inf in state */
+		if (!state_is_valid(xEst)) {
+			fprintf(stderr, "error: filter state became invalid (nan/inf)\n");
+			goto done_1d;
+		}
+
 		est_pos = elem(xEst, 0, 0);
 		est_var = elem(CEst, 0, 0);
 		err = fabs(est_pos - true_pos);
@@ -1120,6 +1138,13 @@ restart_2d:
 
 		/* update */
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_2d, &m_opt);
+
+		/* check for nan/inf in state */
+		if (!state_is_valid(xEst)) {
+			fprintf(stderr, "error: filter state became invalid (nan/inf)\n");
+			action = -1;
+			goto end_loop_2d;
+		}
 
 		est_x = elem(xEst, 0, 0);
 		est_y = elem(xEst, 1, 0);
@@ -2071,6 +2096,13 @@ restart_rot:
 
 		/* update with position measurement */
 		gaussianEstimator_Est(&xEst, &CEst, &y, &Cv, hfun_3d, &m_opt);
+
+		/* check for nan/inf in state */
+		if (!state_is_valid(xEst)) {
+			fprintf(stderr, "error: filter state became invalid (nan/inf)\n");
+			action = -1;
+			goto end_rot;
+		}
 
 		/* extract estimates */
 		est_pos[0] = elem(xEst, 0, 0);
