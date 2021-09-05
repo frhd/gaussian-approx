@@ -591,6 +591,12 @@ static void run_demo(Config *cfg) {
 		if (cfg->interactive)
 			term_raw_mode();
 
+		/* warn if terminal is too small */
+		if (viz_term_small()) {
+			fprintf(stderr, "warning: terminal too small, using compact layout\n");
+			usleep(500000);
+		}
+
 		viz_clear_screen();
 		printf("1D Kalman tracking demo\n");
 		printf("tracking constant velocity target\n");
@@ -705,7 +711,7 @@ static void render_frame_2d(Grid *g, Config *cfg, int step, int nsteps,
 	float rmse, float err, float innov_x, float innov_y,
 	float nis, float nis_avg, int paused, float elapsed,
 	float *innov_hist, float *rmse_hist, int hist_idx) {
-	int wide = viz_term_width() >= 80;
+	int wide = viz_term_width() >= 80 && !viz_term_small();
 	Panel sp;
 	char buf[64];
 
@@ -1319,7 +1325,7 @@ static void render_frame_multi(Grid *g, Config *cfg, Target *targets, int ntarge
 	char buf[64];
 	const char *target_cols[] = {COL_GREEN, COL_YELLOW, COL_CYAN, COL_RED};
 
-	wide = viz_term_width() >= 80;
+	wide = viz_term_width() >= 80 && !viz_term_small();
 
 	viz_clear_screen();
 
@@ -1682,7 +1688,7 @@ end_multi:
 static void render_frame_rot(Grid *g, Config *cfg, int step, int nsteps,
 	float true_rot[3], float est_rot[3], float rot_err,
 	float pos_err, float rmse, int paused, float elapsed) {
-	int wide = viz_term_width() >= 80;
+	int wide = viz_term_width() >= 80 && !viz_term_small();
 	Panel sp;
 	char buf[64];
 
