@@ -116,7 +116,7 @@ Or manually:
 
 Kalman filters estimate the state of a system from noisy measurements. The
 "sigma point" or "unscented" approach approximates the Gaussian distribution
-by propagating carefully chosen sample points through the nonlinear motion
+by propagating carefully chosen sample points through nonlinear motion
 and observation models, then reconstructing the mean and covariance.
 
 This implementation uses a pre-computed optimal sample placement for three
