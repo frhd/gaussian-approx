@@ -36,7 +36,7 @@ No external dependencies beyond gcc and standard libc/libm.
   -q          quiet mode (final result only)
   -i          interactive mode (step with keyboard)
   -v          verbose mode (show sigma points)
-  --speed <ms> animation delay in ms           (default: 100)
+  --speed <ms> animation delay in ms           (default: 80)
   --no-color  disable ANSI colors
   --loop      auto-restart with new seed when done
   --metrics   show convergence metrics (NIS, sparkline)

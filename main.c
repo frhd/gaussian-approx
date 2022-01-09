@@ -53,7 +53,7 @@ static void print_usage(const char *prog) {
 	printf("usage: %s [options]\n", prog);
 	printf("  -m <mode>   demo mode: 2d, 1d, multi, rot, test, grid, compare (default: 2d)\n");
 	printf("  -t <traj>   trajectory: circle, line, fig8, random (default: circle)\n");
-	printf("  -n <steps>  number of steps                 (default: 100)\n");
+	printf("  -n <steps>  number of steps                 (default: 80)\n");
 	printf("  -d <dt>     time step                       (default: 0.1)\n");
 	printf("  -L <level>  approximation level (3,5,7)     (default: 7)\n");
 	printf("  -s <seed>   random seed                     (default: time-based)\n");
@@ -62,7 +62,7 @@ static void print_usage(const char *prog) {
 	printf("  -q          quiet mode (final result only)\n");
 	printf("  -i          interactive mode (step with keyboard)\n");
 	printf("  -v          verbose mode (show sigma points)\n");
-	printf("  --speed <ms> animation delay in ms           (default: 100)\n");
+	printf("  --speed <ms> animation delay in ms           (default: 80)\n");
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  --loop      auto-restart with new seed when done\n");
 	printf("  --metrics   show convergence metrics (NIS, sparkline)\n");
@@ -2308,7 +2308,7 @@ int main(int argc, char *argv[]) {
 	cfg.color = 1;
 	cfg.trajectory = SIM_CIRCLE;
 	cfg.interactive = 0;
-	cfg.speed = 100;
+	cfg.speed = 80;
 	cfg.loop = 0;
 	cfg.outfile = NULL;
 	cfg.ntargets = 2;
@@ -2324,7 +2324,7 @@ int main(int argc, char *argv[]) {
 			i--;
 		} else if (strcmp(argv[i], "--speed") == 0 && i + 1 < argc) {
 			cfg.speed = atoi(argv[i + 1]);
-			if (cfg.speed <= 0) cfg.speed = 100;
+			if (cfg.speed <= 0) cfg.speed = 80;
 			memmove(&argv[i], &argv[i + 2], (argc - i - 2) * sizeof(char *));
 			argc -= 2;
 			i--;
