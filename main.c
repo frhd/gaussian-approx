@@ -66,6 +66,7 @@ static void print_usage(const char *prog) {
 	printf("  --no-color  disable ANSI colors\n");
 	printf("  --loop      auto-restart with new seed when done\n");
 	printf("  --metrics   show convergence metrics (NIS, sparkline)\n");
+	printf("  --version   print version and exit\n");
 	printf("  -h          show this help\n");
 }
 
@@ -2338,6 +2339,9 @@ int main(int argc, char *argv[]) {
 			memmove(&argv[i], &argv[i + 1], (argc - i - 1) * sizeof(char *));
 			argc--;
 			i--;
+		} else if (strcmp(argv[i], "--version") == 0) {
+			printf("vizga 0.1\n");
+			return 0;
 		}
 	}
 
