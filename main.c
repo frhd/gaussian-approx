@@ -1,3 +1,6 @@
+/* enable deprecated functions on newer macos */
+#define _DARWIN_C_SOURCE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
