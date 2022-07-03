@@ -313,6 +313,7 @@ static void viz_grid_putchar(char ch, int r, int c) {
 		putchar('.');
 		viz_color(COL_RESET);
 	} else if (ch == 'o') {
+		viz_color(COL_BOLD);
 		viz_color(COL_YELLOW);
 		putchar(ch);
 		viz_color(COL_RESET);
