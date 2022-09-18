@@ -2242,12 +2242,13 @@ end_rot:
 		goto restart_rot;
 	}
 
-	freeMatrix(xEst);
-	freeMatrix(CEst);
-	freeMatrix(Cw);
-	freeMatrix(Cv);
-	freeMatrix(m_opt);
-	freeMatrix(y);
+	/* cleanup */
+	if (xEst) freeMatrix(xEst);
+	if (CEst) freeMatrix(CEst);
+	if (Cw) freeMatrix(Cw);
+	if (Cv) freeMatrix(Cv);
+	if (m_opt) freeMatrix(m_opt);
+	if (y) freeMatrix(y);
 }
 
 static void run_grid_demo(void) {
