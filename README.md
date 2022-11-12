@@ -21,6 +21,8 @@ make
 
 No external dependencies beyond gcc and standard libc/libm.
 
+Built with gcc/clang on macOS and Linux.
+
 ## Usage
 
 ```
